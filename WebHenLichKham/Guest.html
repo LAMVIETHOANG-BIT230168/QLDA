@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Valeo - Bảng điều khiển bệnh nhân</title>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #4361ee;
+        --secondary: #3f37c9;
+        --accent: #4895ef;
+        --background: #f8f9fa;
+        --text: #333;
+        --success: #4caf50;
+        --warning: #ff9800;
+        --danger: #f44336;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      body {
+        display: flex;
+        background: var(--background);
+      }
+
+      .sidebar {
+        width: 240px;
+        background: white;
+        height: 100vh;
+        padding: 20px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        position: fixed;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 24px;
+        margin-bottom: 40px;
+        color: var(--primary);
+      }
+
+      .menu-item {
+        padding: 15px;
+        margin: 5px 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .menu-item:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      .menu-item.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      .main-content {
+        margin-left: 240px;
+        padding: 20px;
+        width: calc(100% - 240px);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-section {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
+      .appointments-list {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+        flex: 0 0 auto; /* Đảm bảo nút không giãn ra và có kích thước cố định */
+        margin-left: 10px; /* Khoảng cách với các ô chọn */
+        align-self: center; /* Đảm bảo nút nằm giữa chiều dọc của các phần tử */
+      }
+
+      .button-primary {
+        background: var(--primary);
+        color: white;
+      }
+      .button-primaryy {
+        background: var(--primary);
+        color: white;
+        margin-top: 27px;
+      }
+
+      .doctor-info {
+        margin-left: 20px;
+        display: inline-block;
+        vertical-align: top;
+      }
+
+      .doctor-name {
+        font-size: 20px;
+        font-weight: 500;
+        margin-bottom: 5px;
+      }
+
+      .doctor-details {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 3px;
+      }
+
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: 5px;
+        background: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        display: none;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+      }
+
+      /* CSS cao cấp cho Modal đặt lịch - Tông màu xanh dương và trắng */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(10, 30, 66, 0.7);
+        overflow: auto;
+        backdrop-filter: blur(8px);
+      }
+
+      .modal-content {
+        background: linear-gradient(145deg, #ffffff, #f0f7ff);
+        margin: 8% auto;
+        padding: 40px;
+        width: 85%;
+        max-width: 520px;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(25, 68, 156, 0.18),
+          0 2px 10px rgba(0, 91, 225, 0.06);
+        animation: modalExpand 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        border: 1px solid rgba(235, 244, 255, 0.9);
+        position: relative;
+      }
+
+      @keyframes modalExpand {
+        from {
+          opacity: 0;
+          transform: translateY(-40px) scale(0.92);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .modal h3 {
+        margin-top: 0;
+        color: #1a56db;
+        font-size: 30px;
+        font-weight: 700;
+        text-align: center;
+        padding-bottom: 22px;
+        margin-bottom: 30px;
+        letter-spacing: 0.6px;
+        border-bottom: 2px solid #e1edff;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      #selectedInfo {
+        background-color: #e6f0ff;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 28px;
+        border-left: 6px solid #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+        font-size: 16px;
+        line-height: 1.7;
+        color: #1e3a8a;
+      }
+
+      .form-group {
+        margin-bottom: 28px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: #2563eb;
+        font-size: 17px;
+        letter-spacing: 0.4px;
+      }
+
+      .form-group select {
+        width: 100%;
+        padding: 7px;
+        border: 2px solid #c7d9f9;
+        border-radius: 12px;
+        background-color: #f8faff;
+        font-size: 14px;
+        color: #1e3a8a;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 18px;
+        box-shadow: inset 0 2px 4px rgba(37, 99, 235, 0.05);
+      }
+      .doctor-info-small {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+      }
+      .form-group select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25),
+          inset 0 2px 4px rgba(37, 99, 235, 0.05);
+        background-color: #fff;
+      }
+
+      .form-group select:hover {
+        border-color: #60a5fa;
+      }
+
+      .form-group select option {
+        padding: 12px;
+        background-color: #fff;
+        color: #1e3a8a;
+      }
+
+      .button {
+        padding: 16px 30px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: 600;
+        transition: all 0.4s ease;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+      }
+      /* Chỉnh sửa layout mức độ chuyên môn */
+      .experience-checkboxes {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .experience-checkboxes label {
+        display: flex;
+        align-items: center;
+        margin: 0;
+      }
+
+      .experience-checkboxes input[type="checkbox"] {
+        margin-right: 5px;
+      }
+
+      /* Chỉnh sửa layout danh sách lịch khám */
+      #myAppointmentsList tr {
+        vertical-align: middle;
+      }
+
+      #myAppointmentsList .doctor-info-small {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      #myAppointmentsList .doctor-avatar {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+
+      #myAppointmentsList td {
+        vertical-align: middle;
+      }
+      .button-primaryy {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        width: 100%;
+        box-shadow: 0 6px 15px rgba(37, 99, 235, 0.35);
+      }
+
+      .button-primaryy:hover {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+      }
+
+      .button-primaryy:active {
+        transform: translateY(1px);
+        box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35);
+      }
+
+      /* Hiệu ứng ripple nâng cao */
+      .button-primaryy {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .button-primaryy:after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 6px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.6);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+      }
+
+      .button-primaryy:focus:not(:active)::after {
+        animation: ripple 1.2s ease-out;
+      }
+
+      /* CSS cho phần đánh giá sao */
+      .star-rating {
+        display: inline-flex;
+      }
+
+      .star-rating .fas.fa-star {
+        color: #ddd; /* Màu mặc định là xám nhạt */
+        font-size: 24px;
+        padding: 0 2px;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+
+      .star-rating .fas.fa-star:hover,
+      .star-rating .fas.fa-star:hover ~ .fas.fa-star {
+        color: #ffd700; /* Màu vàng khi hover */
+      }
+
+      .star-rating .fas.fa-star.active {
+        color: #ffd700; /* Màu vàng khi đã đánh giá */
+      }
+      @keyframes ripple {
+        0% {
+          transform: scale(0, 0);
+          opacity: 0.6;
+        }
+        20% {
+          transform: scale(25, 25);
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(50, 50);
+        }
+      }
+
+      /* Hover state enhancement */
+      .form-group select,
+      .button-primaryy {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Nút đóng modal */
+      .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #e6f0ff;
+        border: 2px solid #c7d9f9;
+        color: #3b82f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .close-modal:hover {
+        background-color: #dbeafe;
+        color: #1e40af;
+        transform: rotate(90deg);
+        border-color: #93c5fd;
+      }
+
+      /* Đường viền sáng cho modal */
+      .modal-content::before {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        right: -1px;
+        bottom: -1px;
+        background: linear-gradient(
+          45deg,
+          #dbeafe,
+          transparent,
+          #bfdbfe,
+          transparent,
+          #93c5fd
+        );
+        border-radius: 21px;
+        z-index: -1;
+        animation: borderGlow 4s linear infinite;
+      }
+
+      @keyframes borderGlow {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Thêm hiệu ứng floating cho modal */
+      .modal-content {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+      /* CSS cho danh sách thông báo */
+      #notificationList {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .modal-content .button-secondary {
+        width: 100%;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-top: 10px;
+        background-color: #f1f1f1;
+        color: #333;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .modal-content .button-secondary:hover {
+        background-color: #e1e1e1;
+      }
+
+      .modal-content .button-primaryy {
+        width: 100%;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        text-transform: uppercase;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .modal-content .button-primaryy:hover {
+        background-color: #1669d8;
+      }
+
+      .notification-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eaeaea;
+        background-color: #ffffff;
+        transition: background-color 0.2s;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .notification-item:last-child {
+        border-bottom: none;
+      }
+
+      .notification-item:hover {
+        background-color: #f5f9ff;
+      }
+
+      .notification-item.unread {
+        border-left: 4px solid #4285f4;
+        background-color: #f0f7ff;
+      }
+
+      .notification-item .notification-content {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #333;
+      }
+
+      .notification-item .notification-time {
+        font-size: 12px;
+        color: #777;
+        display: flex;
+        align-items: center;
+      }
+
+      .notification-item .notification-time i {
+        margin-right: 5px;
+        font-size: 12px;
+      }
+
+      /* Thêm icon cho các loại thông báo khác nhau */
+      .notification-item.booking-notification::before {
+        content: "\f271"; /* Calendar icon */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #4285f4;
+        margin-right: 10px;
+        font-size: 16px;
+      }
+
+      .notification-item.cancel-notification::before {
+        content: "\f05e"; /* Ban/Cancel icon */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #ea4335;
+        margin-right: 10px;
+        font-size: 16px;
+      }
+
+      .notification-item.edit-notification::before {
+        content: "\f044"; /* Edit icon */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #fbbc05;
+        margin-right: 10px;
+        font-size: 16px;
+      }
+
+      .notification-item.welcome-notification::before {
+        content: "\f0a1"; /* Bullhorn icon */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #34a853;
+        margin-right: 10px;
+        font-size: 16px;
+      }
+      /* Responsive adjustments */
+      @media screen and (max-width: 768px) {
+        .modal-content {
+          width: 92%;
+          margin: 12% auto;
+          padding: 30px;
+        }
+
+        .button {
+          font-size: 17px;
+          padding: 14px 26px;
+        }
+
+        .form-group select {
+          padding: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="logo">
+        <img
+          width="200"
+          height="50"
+          src="Screenshot 2025-03-06 235118.png"
+          class="header_logo header-logo"
+          alt="LamVietHoang"
+        />
+      </div>
+      <div class="menu-item active" onclick="showTab('findDoctor')">
+        <i class="fas fa-search"></i> Tìm bác sĩ
+      </div>
+      <div class="menu-item" onclick="showTab('appointments')">
+        <i class="fas fa-calendar-alt"></i> lịch khám
+      </div>
+      <div class="menu-item" onclick="showTab('notifications')">
+        <i class="fas fa-bell"></i> Thông báo
+      </div>
+      <div class="menu-item" onclick="showTab('profile')">
+        <i class="fas fa-user"></i> Hồ sơ
+      </div>
+      <div class="menu-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+      </div>
+    </div>
+    <div class="main-content">
+      <!-- Tab content for Find Doctor -->
+      <div id="findDoctor" class="tab-content active">
+        <div class="header">
+          <h2>Tìm bác sĩ</h2>
+          <div class="user-info">
+            Guest User
+            <img
+              src="85659530_b78ef3.png"
+              alt="Avatar"
+              width="30"
+              height="30"
+              class="user-avatar"
+            />
+          </div>
+        </div>
+        <div class="search-section">
+          <div class="search-form">
+            <div class="form-group">
+              <label>Chuyên khoa</label>
+              <select id="specialty">
+                <option value="">Chọn chuyên khoa</option>
+                <option value="Tim mạch">Tim mạch</option>
+                <option value="Thần kinh">Thần kinh</option>
+                <option value="Nhi khoa">Nhi khoa</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Địa điểm</label>
+              <select id="location">
+                <option value="hanoi">Hà Nội</option>
+                <option value="namdinh">Nam Định</option>
+                <option value="gialai">Gia Lai</option>
+                <option value="saigon">Sài Gòn</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Thời gian</label>
+              <input id="date" type="date" />
+            </div>
+            <div class="form-group">
+              <label>Mức độ chuyên môn</label>
+              <div class="experience-checkboxes">
+                <label>
+                  <input type="checkbox" value="0-5" id="exp1" /> < 5 năm
+                </label>
+                <label>
+                  <input type="checkbox" value="5-10" id="exp2" /> 5-10 năm
+                </label>
+                <label>
+                  <input type="checkbox" value="10-15" id="exp3" /> 10-15 năm
+                </label>
+                <label>
+                  <input type="checkbox" value="15+" id="exp4" /> > 15 năm
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <button class="button button-primaryy" onclick="searchDoctors()">
+                Tìm kiếm
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Danh sách bác sĩ (chỉ hiển thị sau khi tìm kiếm) -->
+        <div
+          id="doctorListSection"
+          style="display: none"
+          class="appointments-list"
+        >
+          <h3>Danh sách bác sĩ</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Bác sĩ</th>
+                <th>Chuyên khoa</th>
+                <th>Địa điểm</th>
+                <th>Thời gian</th>
+                <th>Lịch trống</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="appointmentsList"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Tab content for Appointments -->
+      <div id="appointments" class="tab-content">
+        <div class="header">
+          <h2>Lịch khám của tôi</h2>
+          <div class="user-info">
+            Guest User
+            <img
+              src="85659530_b78ef3.png"
+              alt="Avatar"
+              width="30"
+              height="30"
+              class="user-avatar"
+            />
+          </div>
+        </div>
+        <div class="appointments-list">
+          <h3>Danh sách lịch khám</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Bác sĩ</th>
+                <th>Chuyên khoa</th>
+                <th>Địa điểm</th>
+                <th>Thời gian</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="myAppointmentsList">
+              <!-- Danh sách lịch khám sẽ được hiển thị ở đây -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab content for Notifications -->
+      <div id="notifications" class="tab-content">
+        <div class="header">
+          <h2>Thông báo</h2>
+          <div class="user-info">
+            Guest User
+            <img
+              src="85659530_b78ef3.png"
+              alt="Avatar"
+              width="30"
+              height="30"
+              class="user-avatar"
+            />
+          </div>
+        </div>
+        <div class="appointments-list">
+          <h3>Danh sách thông báo</h3>
+          <div id="notificationList">
+            <!-- Danh sách thông báo sẽ được hiển thị ở đây -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab content for Profile -->
+      <div id="profile" class="tab-content">
+        <div class="header">
+          <h2>Hồ sơ bệnh nhân</h2>
+          <div class="user-info">
+            Guest User
+            <img
+              src="85659530_b78ef3.png"
+              alt="Avatar"
+              width="30"
+              height="30"
+              class="user-avatar"
+            />
+          </div>
+        </div>
+        <div class="appointments-list">
+          <h3>Lịch sử khám bệnh</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Bác sĩ</th>
+                <th>Thời gian</th>
+                <th>Chẩn đoán</th>
+                <th>Đơn thuốc</th>
+                <th>Hướng dẫn điều trị</th>
+                <th>Đánh giá</th>
+              </tr>
+            </thead>
+            <tbody id="medicalHistoryList">
+              <!-- Lịch sử khám bệnh sẽ được hiển thị ở đây -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal" id="bookingModal">
+      <div class="modal-content">
+        <h3>Book Appointment</h3>
+        <div id="selectedInfo">
+          <!-- Selected information will be displayed here -->
+        </div>
+        <div class="form-group">
+          <label>Chọn giờ</label>
+          <select id="time">
+            <option value="08:00">08:00</option>
+            <option value="10:00">10:00</option>
+            <option value="14:00">14:00</option>
+            <option value="16:00">16:00</option>
+            <option value="18:00">18:00</option>
+            <option value="20:00">20:00</option>
+            <option value="21:00">21:00</option>
+          </select>
+        </div>
+        <div class="time-slots" id="timeSlots">
+          <!-- Time slots will be displayed here -->
+        </div>
+        <button class="button button-primaryy" onclick="confirmBooking()">
+          Xác nhận
+        </button>
+        <button class="button button-secondary" onclick="closeModal()">
+          Hủy
+        </button>
+      </div>
+    </div>
+    <div class="notification" id="notification"></div>
+    <script>
+      // Sample data
+      let notifications = [
+        {
+          id: "not1",
+          message:
+            "Bạn đã đặt lịch khám thành công với bác sĩ Hoàng Ngân vào lúc 10:00 ngày 2024-03-10",
+          time: "05/03/2024 09:15",
+          read: false,
+        },
+        {
+          id: "not2",
+          message:
+            "Bạn đã hủy lịch khám với bác sĩ Vân Anh vào lúc 14:30 ngày 2024-03-07",
+          time: "04/03/2024 16:20",
+          read: true,
+        },
+        {
+          id: "not3",
+          message: "Chào mừng bạn đến với hệ thống đặt lịch khám bệnh",
+          time: "01/03/2024 08:00",
+          read: true,
+        },
+      ];
+      let medicalHistory = [
+        {
+          id: "1",
+          doctorName: "Bác sĩ Anh Quân",
+          doctorImage:
+            "https://htmediagroup.vn/wp-content/uploads/2023/03/Anh-bac-si-nam-7-min.jpg.webp",
+          date: "2024-03-01",
+          time: "09:00",
+          diagnosis: "Tăng huyết áp nhẹ",
+          prescription: "Amlodipine 5mg (1 viên/ngày)",
+          treatment:
+            "Theo dõi huyết áp hàng ngày, giảm muối trong khẩu phần ăn",
+          rating: 5,
+        },
+        {
+          id: "2",
+          doctorName: "Bác sĩ Vân Anh",
+          doctorImage:
+            "https://cmcu.edu.vn/wp-content/uploads/2024/01/ThS.-Nguyen-Thi-Van-Anh.jpg",
+          date: "2024-02-15",
+          time: "14:00",
+          diagnosis: "Đau đầu do căng thẳng",
+          prescription: "Paracetamol 500mg (khi đau)",
+          treatment: "Nghỉ ngơi đầy đủ, giảm thời gian nhìn màn hình",
+          rating: 4,
+        },
+      ];
+      // Cập nhật danh sách thông báo
+      function updateNotificationList() {
+        const notificationList = document.getElementById("notificationList");
+        notificationList.innerHTML = "";
+
+        if (notifications.length === 0) {
+          notificationList.innerHTML =
+            '<div class="no-results">Không có thông báo nào</div>';
+          return;
+        }
+
+        notifications.forEach((notification) => {
+          // Xác định loại thông báo dựa trên nội dung
+          let notificationType = "welcome-notification";
+          if (notification.message.includes("đặt lịch")) {
+            notificationType = "booking-notification";
+          } else if (notification.message.includes("hủy lịch")) {
+            notificationType = "cancel-notification";
+          } else if (notification.message.includes("chỉnh sửa")) {
+            notificationType = "edit-notification";
+          }
+
+          const readClass = notification.read ? "" : "unread";
+          notificationList.innerHTML += `
+        <div class="notification-item ${readClass} ${notificationType}" onclick="markNotificationAsRead('${notification.id}')">
+            <div class="notification-content">${notification.message}</div>
+            <div class="notification-time">
+                <i class="fas fa-clock"></i>${notification.time}
+            </div>
+        </div>
+        `;
+        });
+      }
+      // Đánh dấu thông báo đã đọc
+      function markNotificationAsRead(notificationId) {
+        const index = notifications.findIndex(
+          (notification) => notification.id === notificationId
+        );
+        if (index !== -1) {
+          notifications[index].read = true;
+          updateNotificationList();
+        }
+      }
+
+      function updateMedicalHistory() {
+        const medicalHistoryList =
+          document.getElementById("medicalHistoryList");
+        medicalHistoryList.innerHTML = "";
+
+        if (medicalHistory.length === 0) {
+          medicalHistoryList.innerHTML =
+            '<tr><td colspan="6" class="no-results">Không có lịch sử khám bệnh</td></tr>';
+          return;
+        }
+
+        medicalHistory.forEach((record) => {
+          medicalHistoryList.innerHTML += `
+    <tr>
+      <td>
+        <div class="doctor-info-small">
+          <img src="${record.doctorImage}" alt="${
+            record.doctorName
+          }" width="40" height="40" class="doctor-avatar" />
+          <span style="white-space: nowrap;">${record.doctorName}</span>
+        </div>
+      </td>
+      <td>${record.date}, ${record.time}</td>
+      <td>${record.diagnosis}</td>
+      <td>${record.prescription}</td>
+      <td>${record.treatment}</td>
+      <td>
+        <div class="star-rating" id="rating_${record.id}">
+          <i class="fas fa-star ${
+            record.rating >= 1 ? "active" : ""
+          }" onclick="rateDoctor('${record.id}', 1)"></i>
+          <i class="fas fa-star ${
+            record.rating >= 2 ? "active" : ""
+          }" onclick="rateDoctor('${record.id}', 2)"></i>
+          <i class="fas fa-star ${
+            record.rating >= 3 ? "active" : ""
+          }" onclick="rateDoctor('${record.id}', 3)"></i>
+          <i class="fas fa-star ${
+            record.rating >= 4 ? "active" : ""
+          }" onclick="rateDoctor('${record.id}', 4)"></i>
+          <i class="fas fa-star ${
+            record.rating >= 5 ? "active" : ""
+          }" onclick="rateDoctor('${record.id}', 5)"></i>
+        </div>
+      </td>
+    </tr>
+    `;
+        });
+      }
+
+      // Hàm đánh giá bác sĩ
+      function rateDoctor(recordId, rating) {
+        const index = medicalHistory.findIndex(
+          (record) => record.id === recordId
+        );
+        if (index !== -1) {
+          medicalHistory[index].rating = rating;
+
+          // Cập nhật hiển thị sao
+          const stars = document.querySelectorAll(
+            `#rating_${recordId} .fas.fa-star`
+          );
+          stars.forEach((star, i) => {
+            if (i < rating) {
+              star.classList.add("active");
+            } else {
+              star.classList.remove("active");
+            }
+          });
+
+          // Thêm thông báo đánh giá
+          addNotification(
+            `Bạn đã đánh giá bác sĩ ${medicalHistory[index].doctorName} ${rating} sao`
+          );
+        }
+      }
+      // Hàm thêm thông báo mới
+      function addNotification(message) {
+        const notificationId = Date.now().toString();
+        const now = new Date();
+        const formattedDate = `${now.getDate()}/${
+          now.getMonth() + 1
+        }/${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
+
+        // Thêm thông báo mới vào đầu mảng
+        notifications.unshift({
+          id: notificationId,
+          message: message,
+          time: formattedDate,
+          read: false,
+        });
+
+        // Cập nhật lại danh sách thông báo nếu đang ở tab thông báo
+        if (
+          document.getElementById("notifications").classList.contains("active")
+        ) {
+          updateNotificationList();
+        }
+      }
+
+      function confirmBooking() {
+        let selectedTime = document.getElementById("time").value;
+
+        // Tạo ID duy nhất cho lịch khám
+        const appointmentId = Date.now().toString();
+
+        // Lưu thông tin lịch khám vào mảng appointments
+        const newAppointment = {
+          id: appointmentId,
+          doctorName: currentDoctorData.name,
+          specialty: currentDoctorData.specialty,
+          location: currentDoctorData.location,
+          date: currentDoctorData.date,
+          time: selectedTime,
+          image: currentDoctorData.image,
+          status: "Đã xác nhận",
+        };
+
+        appointments.push(newAppointment);
+
+        // Thêm thông báo mới khi đặt lịch thành công
+        addNotification(
+          `Bạn đã đặt lịch thành công với bác sĩ ${currentDoctorData.name} vào lúc ${selectedTime} ngày ${currentDoctorData.date}`
+        );
+
+        alert(
+          `Bạn đã đặt lịch với bác sĩ ${currentDoctorData.name} vào lúc ${selectedTime} ngày ${currentDoctorData.date}`
+        );
+        document.getElementById("bookingModal").style.display = "none";
+
+        // Chuyển đến tab lịch khám sau khi đặt lịch thành công
+        showTab("appointments");
+      }
+      let appointments = [];
+      let doctors = [
+        {
+          name: "Bác sĩ Hoàng Ngân",
+          specialty: "Tim mạch",
+          location: "Hà Nội",
+          image:
+            "https://mauweb.monamedia.net/valeo/wp-content/uploads/2019/09/Dr-3.jpg",
+          experience: "15 năm kinh nghiệm",
+          position: "Trưởng khoa Tim mạch, PGS.TS",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+        {
+          name: "Bác sĩ Vân Anh",
+          specialty: "Tim mạch",
+          location: "Hà Nội",
+          image:
+            "https://cmcu.edu.vn/wp-content/uploads/2024/01/ThS.-Nguyen-Thi-Van-Anh.jpg",
+          experience: "10 năm kinh nghiệm",
+          position: "Phó khoa Tim mạch, TS",
+          availableTimes: ["09:00", "11:00", "15:00"],
+        },
+        {
+          name: "Bác sĩ Anh Quân",
+          specialty: "Tim mạch",
+          location: "Nam Định",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2023/03/Anh-bac-si-nam-7-min.jpg.webp",
+          experience: "8 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "10:00", "13:00", "15:00"],
+        },
+        {
+          name: "Bác sĩ Văn Quang",
+          specialty: "Tim mạch",
+          location: "Nam Định",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2022/01/Anh-bac-si-1-min.jpg.webp",
+          experience: "5 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["09:00", "11:00", "17:00"],
+        },
+        {
+          name: "Bác sĩ Chí Thành",
+          specialty: "Tim mạch",
+          location: "Gia Lai",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2022/12/Anh-bac-si-12-min.jpg.webp",
+          experience: "6 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["10:00", "14:00", "18:00"],
+        },
+        {
+          name: "Bác sĩ Tùng Dương",
+          specialty: "Tim mạch",
+          location: "Gia Lai",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2022/01/Anh-bac-si-3-min.jpg.webp",
+          experience: "7 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "13:00", "16:00", "19:00"],
+        },
+        {
+          name: "Bác sĩ Trường Sơn",
+          specialty: "Tim mạch",
+          location: "Sài Gòn",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2022/12/Anh-bac-si-10-min-585x878.jpg.webp",
+          experience: "4 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["09:00", "12:00", "16:00"],
+        },
+        {
+          name: "Bác sĩ Anh Tuấn",
+          specialty: "Tim mạch",
+          location: "Sài Gòn",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2022/12/Anh-bac-si-9-min-585x878.jpg.webp",
+          experience: "3 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["07:00", "10:00", "14:00", "19:00"],
+        },
+        // Thần kinh
+        {
+          name: "Bác sĩ Như Quỳnh",
+          specialty: "Thần kinh",
+          location: "Hà Nội",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2022/09/Anh-bac-si-nu-2-min-585x878.jpg.webp",
+          experience: "8 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+        {
+          name: "Bác sĩ Minh Đàn",
+          specialty: "Thần kinh",
+          location: "Hà Nội",
+          image:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTfIEbSOOI0Eh9N1KO2HFDMfwuIE4T2mXQ89A&s",
+          experience: "9 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["09:00", "13:00", "17:00"],
+        },
+        {
+          name: "Bác sĩ Khương Lộc",
+          specialty: "Thần kinh",
+          location: "Nam Định",
+          image:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxCYtCO39LiKYhOk7U_QdQ4IhDlEuA36pmcJxOld9r18mHENMu6_N7Ct0sTGr5C1919-s&usqp=CAU",
+          experience: "10 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "12:00", "15:00", "18:00"],
+        },
+        {
+          name: "Bác sĩ Quốc Bảo",
+          specialty: "Thần kinh",
+          location: "Nam Định",
+          image:
+            "https://dongphuckimvang.vn/assets/shops/dp-ao-bac-si/ao-khoac-blouse-bac-si-akbbs20.jpg",
+          experience: "11 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["09:00", "11:00", "14:00"],
+        },
+        {
+          name: "Bác sĩ Thục Uyên",
+          specialty: "Thần kinh",
+          location: "Gia Lai",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2022/12/Anh-bac-si-13-min-585x878.jpg.webp",
+          experience: "12 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["10:00", "16:00", "18:00", "20:00"],
+        },
+        {
+          name: "Bác sĩ Ngân Hà",
+          specialty: "Thần kinh",
+          location: "Gia Lai",
+          image:
+            "https://htmediagroup.vn/wp-content/uploads/2022/03/Anh-ba-si-3-min-585x390.jpg.webp",
+          experience: "13 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00", "18:00"],
+        },
+        {
+          name: "Bác sĩ Đức Thịnh ",
+          specialty: "Thần kinh",
+          location: "Sài Gòn",
+          image:
+            "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAQEBUQDxAQEBEVDxAQDw8QEBAPDw8QFRUWFhURFRUYHSggGBolGxUVITEhJSkrLi4uFx8zODMsNygtLisBCgoKDg0OFxAQFy0lHSUtLSstLS0tLSstLS0tLS0tLS0tLS0tLSstLS0tLS0rLS0tLS0rLS0tLSstLSstLSstLf/AABEIARMAtwMBIgACEQEDEQH/xAAcAAACAwEBAQEAAAAAAAAAAAAAAQIDBAYFBwj/xAA+EAACAQIDBQYDBQcCBwAAAAAAAQIDEQQhMQUSQVFhBhMicYGRMrHBFEJSodEHFSNicuHwgpJzg6KywtLx/8QAGQEBAQEBAQEAAAAAAAAAAAAAAAECAwQF/8QAIxEBAQACAgICAgMBAAAAAAAAAAECEQMSITFBUQRCImFxE//aAAwDAQACEQMRAD8A+2AAG2QAAAAAAAAAAAgAYmAAAgsAAILAUAh2FYBXISk1nlrp08yZXWatZq/T5HPkusbdrj7RWIXkrtX/AM8mTuY1iJrLuqnHNKOfXjrny/SFCpJOUpU6m843yV1ZaU118TM8f/T9ly6/DcwKaVZybTpyhbi91p+VmB3ZbwADIAAAAAAAC4CALgAAAAAAIYgC4hiKEFwEAFcY8839eZYIzcZbLTZMTYCNBXGICjUAgMhiAAAYgAYgAAIzmoq8mkubdjn+2fa2js2jvz8dWV1RoppOT5vlFcz4P2g7Y4vGTbrVZbr0pxbVOK5KK+ZZB+iVtzCb279po72lu8jqboVIyV4tNdHc/KsKsrX3j0dk9p8VhpJ0a842+6neD6OLui6XT9NgcJ2G/aDDGtUMSo0sQ8oNZU6z5K/wy6ceHI7oyAAEVAIAYCExsQCEMTYEWMTAo1CARkMAABgIAGZ9o42GHpTr1Xu06cJVJvlGKu/UvOJ/bDXcNlTirrvKtGm7fh3t5r2iB8R7Ubcq47ETxNV2c34IXuqVNfDBen1PGhG/1f6nRbJ7P1MW7QsklnLgv8yNWH7I195RjSqTknbNKFKPVviS5R0x47XiYPDXTWfy+Z6OE2LG+9N5LPz8lqfQOz/YtU/HXtOfllHov1Oqp7MoxWVOPsjneR3x4ft8djTpXtTc1JZxe7ezR9a/Zv2oniIywuJd69OKlGTedWn+qCthKVn/AA4J2d3uq5xPZxyhtWhuXuq24/8Ahu8Xf0ZvDPs58vH1fbQCwWNuBCHYVgFcLgIAIsYmAmAmBUagEBlTAQAMAAAOL/a7RlLZc91X3atGUukd6zf5o7M5ftzN7tOLs6UlV72DV4yVo2v7/mTLLrNt8eHfKR88/ZvBqE5SVoqzb6vM7OO2Ix1oVd3hNRvEwbBwUKOG/hreTk5Rc7WdslfpkUYz7Z3mVaKp7rvHcb8XDPkccvN29WO46PD4+nPR+fD3RXiNsUYZSl7eJ+yPMwVaNp944uUaXeTcYOyjZ8n0PN2jWxEM8KqN7JxUk/GnbV/3MSeXW3w92eKp1U+7lwvZpps4/sTSlPbFrNqE51G+SSa+bOk2bUqSt38Fv2upQyXVeXmUdl7YXG1qlnPva0aTe7Z003d530zXsdMNYuGcuXiPpIrjEdnkFxXARQXFcBAIVxkWEJsAYFGoBAZUwEADAiADPJ7S4PvaP9Lu/wCl5P6HqilFNNNXTVmuhMpuabwy65SuNwvggoJKyVrfUjiadJZuN3lZXe7fqadsYfu6jUb2smr9f8Zz9baMIVu6q5uUcr5Rt1bPNZd6e7HKa29XDY3C/wATx05StuVt1p2svhly1ZGKoy3Y5OO6u7nTllZcLr0PNjhqEr5Uk+Wef68Sp4rD0EqacIOT8O7JfF0jrYdW+329504w093mR2Tgm8TvJtxlNSael420/wBpTRlJ2v0Or2Xge7W87NtKyXC+b9S442ufJnMJXoMQCPS+eQhiKEJkhARIkmIIiwBgVGoBAZaMQgAdwuIAGFxAB43aOjlGf+h/NfU8RYZSzcU7qzZ0PaBXou2qal7Xv+Vzk44xxOHJPL2cOX8V89nyb0g11XiHLZ8LNOCejba1a0MM9qSvqi5bRclbiYu3a5PQwNLeqxi+Mlfy4nYHI7DTdaL5ZvotPm0dCtow7/7NLwVXDvaaelamspSg+Li9Vqrp6M7cU8PJz3+TaILCsdHACuArFBcTYMTAGyLY2JhEGwGwKjUAgMtALgIAuFwSLFT5gVnjbbx0++o4Si3GdZylOa1p0IW35Lk3ome9Y46ljKf75m6lSEdzB06UN6UY3nKbm4q/GzWRrGFdJiaKaXKLvbpZxafPJs4vbOF7mo42ytvR6xZ36WZ5u1dlxrR3XlJXdOXK+sfLoc+THtHXiz63z6cD9nhLxN+jLcNC8koq7bSUUs22acXsxwluuNpJ83odF2c2Sqce9kvE14F+FPj5s82ONyunrzymOO2vZmzlTSTzk2p1H5ZxivWx5/bvAzlhliKN1iMNNYihJa5fHDylHVdEdLCNkFSClFpq6aaa5pnsx1Hgytt3WHZO0Y4mhSrw+GrTjNL8Lazj6O69DY0cl+zyThQqYaWuHxtekl/I23H6nYls0im4my2USuSIItiuMiwC4mwZFlQNiExlZagARlsDgrkSUFxAtirDuF+Ilq/cg5HtTjK1fERwGHq9wnDvMTXXxwpcVHrnFf6l1viXYTCbjiqbu9a1WUpVZX1ks/C/P2N9Cintes3m+5ouPRbj+sV7HR1KOWl+j4rijrLrSOf7BVpdxUo1HepRrTpTk225KL3U7vgt1pdIo6LG14U6cqlR7sIRc5yzdopXbsjl+xmBr06+KnVg4wnU/hNtNTiqlSzyeWW7qdbUgpJpq6aaa5pmMvax8+pdrYYupUqxjTjRpU9+Kk6TqVLreW//ABVZfytLqzoeyXaihtGDdNSpzjZVKUlmv5ovSUc9Vpexx1SGGw9bEYWVZ0oSlGM6cnUhGMXUhBuK+Hxd6rdFfqfQ9j4SlCO/SUVGUYqDilZwtlbp+hnXut2+I9AqlSz3lKSyzjfwt87MuK6lSz3VnL/tXNiMOQ2FF09p42ndWlKhVyTWe6r8ecjsF9DlMLG22a1uOGpN9XemdSufmbyIkhTBCfMyKWRZORFhEWRZJiZUQYAwNI1iCwGGwWxyKo6ltrO3sBLQhvZ+jJldRaPr88iDLGEftDdlvOEc+Nmpf+puZkmv40X/AC/K6/8AM1MtGSMZKd4/D8Mo8820/PM1wmmsv7p8mVQ0f9Q5Q+8snx5PzLRzfa3Z6nUp2wyrOvOFCpKyXdxipzU5S5XX5c7HUUqajFRikklZJKyIqS1llbPPh1K3Jy6R5cZefJdCaXZqupNqDvZ2cuCfFLmycKaWnq+LI0YKKslYm2x/iOXwee18Q/w0aMfdU39GdFSndevzOc7Nt1cZjK3Dv40l/wAtOL+UToKHFfzG7EjSkKTAbj7GFUzWRU2XVXcpaKhNkWyTIMqE2BGTA1EbbiuAjm2dzTa6zM0Vc0QFEVdZPNcxVFl+fsWkGiSjNidU+V/ys7fkXt8Sib0/zgKtUtTy4rdXm8kb0LKHwJ88/d3LYsrh8KXSw4sgi4X8k9OF+ZKbyfkOCyFNfNATuZsROTi1DwuzUZtXs+Dtxsy+po36lGNrQcVLeslndSaX9yDB2b2b9lw/duW9NynOcucm8teUVFehpws7zkuv0QqNfejfTLJcUrZX6lGzpXqzS6fI6yeLaj2ExDUQZyVWzO2aZGaorMqVFsrbJMgzUZRbEDA0jaAriucm1lN8Sc9L3tZNkKJJprQqsa2glnfeXNFn22DV9+3SzOZ2piI0KrVnBPO12o9bEsPjYyV1m7aaXOOXJZdPXjw4ZTc29eriql7QUbbyzetm7Z+5KlSqXbk+OUYpWT553PLjNvyNNHETX3n65mp+RPpi/j34r0qdKV0959c38tDVFHnLHu33SqvtaaaVNRb43uyZc+Em2Z+Pnbp7cNF5CYYOop04ztbegnbk7ZotlbobmW3KzTPUuc9jILevG36HS1KW8rXa6rJlEdnUl92/m2LldajWPWe3Ozxqpq0pJXXGx6XZ3ERlTlNSTTquzXRRXzuelGjThkoqPVLP3B0csmmuUkmvdZjHt+1XPLG+ouhUT0YOZhpThTlbc7tvr4ZeTNtzVmnNFyTKcQtCcjM9WWJSZBkmRZqMIMYmM0NVxNisJnJppoq8b9SUvS5hlUkvheXFFrjxTafK9zWllc92lpVFLfcItJW5rzszyYYmNt2Kaklpu5eh2Neg6itK1uZx23tnSpO8XJRve64focubj3Nx6eHk14opYqp+FxXNtI008bn8Sfnn9Dnv3glnaMn+KTefWwPaFSXwu3SCs366nlmL1XLTpZ42MfjyvouL8lqb44Gc7Ti93wpWdrt5u+l9GlqtDh26me5Tle17tXt1bOvwvabCThGVSs6UovxwkqkG2k14bLxq+lrmpxz93HPkvjpXt9nK8u57udt+nOUJWVk7veTSu8s+b0N+IUZq0sle6d7NM5zs1tb7TOtUjCcYKVNU7xs5x3X42tVmj3sVLwSy0V83bQ9WGOpHkyvmk6VWHwTuuUs/zF9vlHKrBx/mXiiY6WMmuq87l6xO9pG51uN+Wdt0JqavFplM4yi7rTiYJ0pRe/CLjzis0/QnDaEuMW+fAnT6NtU5Rmt2WaZlp1Z0XaV503pLWUOj5os+0wl95RfJtJlc8ZFZTu1zUWWRNtzmtb8L3MzkZaVSM2lFtxT45Za2NLJrSWhsi5A0RZUKTAg2Boa2xNg2RZzUpztmuAntKhFXcrv8Nne4M8vEYSMLy3d5a5ZtGpJVbY7Tc81HLzM+Jj3mqMEq3Kk+jsJYqr19c/mbkguhsGEnfdXnZGqns/D0uCb5KxgU60skpPor/Quw+BxL+7CK5yefsrjR5aKu61ZRUVy5+Z4lfZq1laMczoobLv8AHUflBJfqWrZdKOdrvnJ73zG4PL7JbidSMOl3Z5/rxOgrJSTjzTRjwkYqo9217Z2Nrjxvl+RjL2ryZbKfApls6a0v7s9aptPDwdnNX5LMpltujwu/Qu79I8t4Gtw3v9zK3s2s9V7s9Ge3I8I/mjLV21LgkvM15FH7qqcZJFc04Zd82+SsyqWOlVdt58eiPT2dg4bqm1d9dF6C1F+z6LjHek/E1pyRqbC5FsygbINkmRYEGwBiKNbZFsi2RbM6U3IVyLYmUZ8SvEt3LVu2RmxGMrRV4qL84q5slS3m82tM17mvCYVJWlaV3yNb1CPHw2LxFRZLPillY24eliH8bUf+r8j0oUFF3iktUy5mbl9LpljhZfeqzfluxXyLI4SHFOX9UpS/JlkWmWRRndI83Fx3L7kUsrZJI8vcrNu0pLeTUrPVHSuKfAg6SLMvs05lbDb6FNbZMrWisjq52IOmn06I12HJLZLjZW8zRR2Y1nbgdIqK6jdJDtBzuHwVmmephI2jbqae6SeSRCUbF8VAK4riIhkWwZFgJsBMALWyLkTyIsioORFyJtEbAW0ka6TyM1JZP0LlyV/dlyRfYlfIzqTv8Tt6FkZ9W/YxY1s0i6JQn1LFPREImVzZLfKqmYkW0tdS2KyMzh1a8i6Ecr/m1masZlSc4817ojf/ADMbaSK+9JItofl9CqsXNmeTbvy5moypuK5ITKI3FcbIMAbAg2BRpbItibItkU2yLkJsRBqg/kXRMlC6156GlXTzRqok0WxgkhQCTbMLEHMtptO3Myp2drlsJ2cfX5MtiStMqXG/6Gaq7/D/AHLd/MhUSefEmP8Aa1T30lqi7v8A/wCFffcGDnl8PDJ8Ga1/SCU22ThAVKnzLt6xLfiEZ68mvCtfkiMYOzzski9RWvETStmXYwtibCasQbLQ3IhJg2RbIBsBNgBeyLAAqI1r6iADRPU1awTYAW/CEtS6TyADN9kY5q2nMsp8PN/JiA3fSRoZTVADGLVVvU0UkAFy9JE2KQAZVAkgAtR59T9SsANUhEWAEEWAAB//2Q==",
+          experience: "14 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+
+        {
+          name: "Bác sĩ Kiên Vũ",
+          specialty: "Thần kinh",
+          location: "Sài Gòn",
+          image:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpAUI0KuOp92rjuJj2bE1JsRjjR-XM9nZECw&s",
+          experience: "15 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00", "18:00"],
+        },
+
+        // Pediatrics
+        {
+          name: "Bác sĩ Việt Hoàng",
+          specialty: "Nhi khoa",
+          location: "Hà Nội",
+          image:
+            "data:image/jpeg;base64,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",
+          experience: "16 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+
+        {
+          name: "Bác sĩ Nhật Linh",
+          specialty: "Nhi khoa",
+          location: "Hà Nội",
+          image:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHnXvLotMtdB8bN2o8zJuKtkOk8GndsK1tpWYxyhsL1Y2Rko-NCidsHzl8FEkTJ__bs1c&usqp=CAU",
+          experience: "17 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00", "18:00"],
+        },
+
+        {
+          name: "Bác sĩ Khánh Linh",
+          specialty: "Nhi khoa",
+          location: "Nam Định",
+          image:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1b7S3ILH81n4S-uAvr_NlOc9pw-SGyqiJ3w&sto_image",
+          experience: "18 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+
+        {
+          name: "Bác sĩ Nhật Minh",
+          specialty: "Nhi khoa",
+          location: "Nam Định",
+          image:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQV6MRKcB8ueT1YTyyxgZ5kzAS2YP2eeIRNskyP6zaeMlRzVhc17L7APKnTZivWc8PT0SY&usqp=CAU",
+          experience: "19 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00", "18:00"],
+        },
+
+        {
+          name: "Bác sĩ Ngọc Kiên",
+          specialty: "Nhi khoa",
+          location: "Gia Lai",
+          image:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqf3WXmVS6wd6ZDub3eAEM2hkVNQsodu3objKitmnQ7PQScSyHxL0hlN7utNR4T-QycFg&usqp=CAU",
+          experience: "20 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+
+        {
+          name: "Bác sĩ Du Thiên",
+          specialty: "Nhi khoa",
+          location: "Gia Lai",
+          image:
+            "data:image/jpeg;base64,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",
+          experience: "21 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+
+        {
+          name: "Bác sĩ Độ Mixi",
+          specialty: "Nhi khoa",
+          location: "Sài Gòn",
+          image:
+            "data:image/jpeg;base64,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",
+          experience: "22 năm kinh nghiệm",
+          position: "Bác sĩ chính",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+
+        {
+          name: "Bác sĩ MidFeed",
+          specialty: "Nhi khoa",
+          location: "Sài Gòn",
+          image:
+            "data:image/jpeg;base64,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",
+          experience: "23 năm kinh nghiệm",
+          position: "Bác sĩ phụ",
+          availableTimes: ["08:00", "10:00", "14:00", "16:00"],
+        },
+      ];
+
+      // Biến lưu trữ thông tin bác sĩ và thời gian đang chọn để đặt lịch
+      let currentDoctorData = null;
+
+      function searchDoctors() {
+        const selectedSpecialty = document.getElementById("specialty").value;
+        const selectedLocation = document.getElementById("location").value;
+        const selectedDate = document.querySelector('input[type="date"]').value;
+
+        // Lấy các checkbox về mức độ chuyên môn
+        const expRanges = [];
+        if (document.getElementById("exp1").checked) expRanges.push("0-5");
+        if (document.getElementById("exp2").checked) expRanges.push("5-10");
+        if (document.getElementById("exp3").checked) expRanges.push("10-15");
+        if (document.getElementById("exp4").checked) expRanges.push("15+");
+
+        const filteredDoctors = doctors.filter((doctor) => {
+          const specialtyMatch =
+            selectedSpecialty === "" ||
+            doctor.specialty.toLowerCase() === selectedSpecialty.toLowerCase();
+
+          // Map location values to match doctor data
+          const locationMapping = {
+            hanoi: "Hà Nội",
+            namdinh: "Nam Định",
+            gialai: "Gia Lai",
+            saigon: "Sài Gòn",
+          };
+
+          const locationMatch =
+            selectedLocation === "" ||
+            doctor.location.toLowerCase() ===
+              locationMapping[selectedLocation].toLowerCase();
+
+          // Kiểm tra mức độ chuyên môn
+          let experienceMatch = true;
+          if (expRanges.length > 0) {
+            // Trích xuất số năm kinh nghiệm từ chuỗi "XX năm kinh nghiệm"
+            const yearsExp = parseInt(doctor.experience.match(/\d+/)[0]);
+
+            experienceMatch = expRanges.some((range) => {
+              if (range === "0-5") return yearsExp < 5;
+              if (range === "5-10") return yearsExp >= 5 && yearsExp <= 10;
+              if (range === "10-15") return yearsExp > 10 && yearsExp <= 15;
+              if (range === "15+") return yearsExp > 15;
+              return false;
+            });
+          }
+
+          return specialtyMatch && locationMatch && experienceMatch;
+        });
+
+        // Hiển thị phần danh sách bác sĩ
+        document.getElementById("doctorListSection").style.display = "block";
+
+        const appointmentsList = document.getElementById("appointmentsList");
+        appointmentsList.innerHTML = ""; // Clear previous results
+        filteredDoctors.forEach((doctor) => {
+          // Hiển thị thời gian trống của bác sĩ
+          const availableTimesHTML = doctor.availableTimes
+            .map((time) => `<span class="available-time">${time}</span>`)
+            .join(" ");
+
+          appointmentsList.innerHTML += `
+      <tr>
+        <td>
+          <div class="doctor-profile">
+            <img src="${doctor.image}" alt="${doctor.name}" class="doctor-image" width="300" height="300" />
+            <div class="doctor-info">
+              <div class="doctor-name">${doctor.name}</div>
+              <div class="doctor-details">${doctor.position}</div>
+              <div class="doctor-details">${doctor.experience}</div>
+            </div>
+          </div>
+        </td>
+        <td>${doctor.specialty}</td>
+        <td>${doctor.location}</td>
+        <td>${selectedDate}</td>
+        <td>
+          <div class="available-times">
+            ${availableTimesHTML}
+          </div>
+        </td>
+        <td><button class="button button-primary" onclick="bookAppointment('${doctor.name}', '${doctor.specialty}', '${doctor.location}', '${selectedDate}', '${doctor.availableTimes}', '${doctor.image}')">Đặt lịch</button></td>
+      </tr>
+    `;
+        });
+
+        if (filteredDoctors.length === 0) {
+          appointmentsList.innerHTML =
+            "<tr><td colspan='6' class='no-results'>Không tìm thấy bác sĩ phù hợp với tiêu chí tìm kiếm</td></tr>";
+        }
+      }
+
+      function bookAppointment(
+        name,
+        specialty,
+        location,
+        date,
+        availableTimes,
+        image
+      ) {
+        // Chuyển đổi chuỗi availableTimes thành mảng
+        const times = availableTimes.split(",");
+
+        // Lưu thông tin bác sĩ hiện tại vào biến
+        currentDoctorData = {
+          name,
+          specialty,
+          location,
+          date,
+          image,
+          availableTimes: times,
+        };
+
+        document.getElementById("selectedInfo").innerHTML = `
+      <p><strong>Bác sĩ:</strong> ${name}</p>
+      <p><strong>Chuyên khoa:</strong> ${specialty}</p>
+      <p><strong>Địa điểm:</strong> ${location}</p>
+      <p><strong>Thời gian:</strong> ${date}</p>
+  `;
+
+        // Cập nhật dropdown thời gian dựa trên thời gian trống của bác sĩ
+        const timeSelect = document.getElementById("time");
+        timeSelect.innerHTML = "";
+
+        times.forEach((time) => {
+          const option = document.createElement("option");
+          option.value = time;
+          option.textContent = time;
+          timeSelect.appendChild(option);
+        });
+
+        document.getElementById("bookingModal").style.display = "block";
+      }
+
+      function closeModal() {
+        document.getElementById("bookingModal").style.display = "none";
+      }
+
+      function confirmBooking() {
+        let selectedTime = document.getElementById("time").value;
+
+        // Tạo ID duy nhất cho lịch khám
+        const appointmentId = Date.now().toString();
+
+        // Lưu thông tin lịch khám vào mảng appointments
+        const newAppointment = {
+          id: appointmentId,
+          doctorName: currentDoctorData.name,
+          specialty: currentDoctorData.specialty,
+          location: currentDoctorData.location,
+          date: currentDoctorData.date,
+          time: selectedTime,
+          image: currentDoctorData.image,
+          status: "Đã xác nhận",
+        };
+
+        appointments.push(newAppointment);
+
+        alert(
+          `Bạn đã đặt lịch với bác sĩ ${currentDoctorData.name} vào lúc ${selectedTime} ngày ${currentDoctorData.date}`
+        );
+        document.getElementById("bookingModal").style.display = "none";
+
+        // Chuyển đến tab lịch khám sau khi đặt lịch thành công
+        showTab("appointments");
+      }
+
+      function updateAppointmentsList() {
+        const myAppointmentsList =
+          document.getElementById("myAppointmentsList");
+        myAppointmentsList.innerHTML = ""; // Xóa danh sách cũ
+
+        if (appointments.length === 0) {
+          myAppointmentsList.innerHTML =
+            "<tr><td colspan='6' class='no-results'>Bạn chưa có lịch khám nào</td></tr>";
+          return;
+        }
+
+        appointments.forEach((appointment) => {
+          myAppointmentsList.innerHTML += `
+    <tr>
+      <td>
+        <div class="doctor-info-small">
+          <img src="${appointment.image}" alt="${
+            appointment.doctorName
+          }" width="40" height="40" style="object-fit: cover;" class="doctor-avatar" />
+          <span style="white-space: nowrap;">${appointment.doctorName}</span>
+        </div>
+      </td>
+      <td>${appointment.specialty}</td>
+      <td>${appointment.location}</td>
+      <td>${appointment.date}, ${appointment.time}</td>
+      <td><span class="status-badge ${appointment.status
+        .toLowerCase()
+        .replace(" ", "-")}">${appointment.status}</span></td>
+      <td>
+        <button class="button button-edit" onclick="openEditModal('${
+          appointment.id
+        }')">Chỉnh sửa</button>
+        <button class="button button-danger" onclick="cancelAppointment('${
+          appointment.id
+        }')">Hủy lịch</button>
+      </td>
+    </tr>
+  `;
+        });
+      }
+      function openEditModal(appointmentId) {
+        // Tìm thông tin lịch khám cần chỉnh sửa
+        const appointment = appointments.find(
+          (app) => app.id === appointmentId
+        );
+        if (!appointment) return;
+
+        // Tạo modal chỉnh sửa nếu chưa có
+        if (!document.getElementById("editModal")) {
+          const editModal = document.createElement("div");
+          editModal.id = "editModal";
+          editModal.className = "modal";
+          editModal.style.display = "none";
+
+          editModal.innerHTML = `
+    <div class="modal-content">
+      <h3>Chỉnh sửa lịch khám</h3>
+      <div id="editAppointmentInfo"></div>
+      <div class="form-group">
+        <label>Chọn ngày</label>
+        <input type="date" id="editDate">
+      </div>
+      <div class="form-group">
+        <label>Chọn giờ</label>
+        <select id="editTime">
+          <option value="08:00">08:00</option>
+          <option value="09:00">09:00</option>
+          <option value="10:00">10:00</option>
+          <option value="11:00">11:00</option>
+          <option value="14:00">14:00</option>
+          <option value="15:00">15:00</option>
+          <option value="16:00">16:00</option>
+          <option value="17:00">17:00</option>
+        </select>
+      </div>
+      <button class="button button-primaryy" onclick="saveAppointmentChanges()">Lưu thay đổi</button>
+      <button class="button button-secondary" onclick="closeEditModal()">Hủy</button>
+    </div>
+    `;
+
+          document.body.appendChild(editModal);
+        }
+
+        // Hiển thị thông tin lịch khám hiện tại
+        document.getElementById("editAppointmentInfo").innerHTML = `
+    <p><strong>Bác sĩ:</strong> ${appointment.doctorName}</p>
+    <p><strong>Chuyên khoa:</strong> ${appointment.specialty}</p>
+    <p><strong>Địa điểm:</strong> ${appointment.location}</p>
+  `;
+
+        // Đặt giá trị mặc định là thời gian hiện tại của lịch khám
+        document.getElementById("editDate").value = appointment.date;
+        document.getElementById("editTime").value = appointment.time;
+
+        // Lưu ID lịch khám đang chỉnh sửa vào một biến toàn cục
+        window.currentEditAppointmentId = appointmentId;
+
+        // Hiển thị modal
+        document.getElementById("editModal").style.display = "block";
+      }
+
+      function closeEditModal() {
+        document.getElementById("editModal").style.display = "none";
+      }
+      function cancelAppointment(appointmentId) {
+        if (confirm("Bạn có chắc chắn muốn hủy lịch khám này không?")) {
+          // Tìm vị trí của lịch khám trong mảng
+          const index = appointments.findIndex(
+            (appointment) => appointment.id === appointmentId
+          );
+
+          if (index !== -1) {
+            // Lấy thông tin lịch khám trước khi xóa
+            const canceledAppointment = appointments[index];
+
+            // Xóa lịch khám khỏi mảng
+            appointments.splice(index, 1);
+
+            // Thêm thông báo hủy lịch
+            addNotification(
+              `Bạn đã hủy lịch khám với bác sĩ ${canceledAppointment.doctorName} vào lúc ${canceledAppointment.time} ngày ${canceledAppointment.date}`
+            );
+
+            // Cập nhật lại danh sách lịch khám
+            updateAppointmentsList();
+
+            // Hiển thị thông báo
+            showNotification("Đã hủy lịch khám thành công");
+          }
+        }
+      }
+      function saveAppointmentChanges() {
+        const appointmentId = window.currentEditAppointmentId;
+        const newDate = document.getElementById("editDate").value;
+        const newTime = document.getElementById("editTime").value;
+
+        // Tìm lịch khám cần cập nhật
+        const index = appointments.findIndex((app) => app.id === appointmentId);
+        if (index !== -1) {
+          // Lưu thông tin cũ để tạo thông báo
+          const oldDate = appointments[index].date;
+          const oldTime = appointments[index].time;
+
+          // Cập nhật thông tin mới
+          appointments[index].date = newDate;
+          appointments[index].time = newTime;
+
+          // Tạo thông báo
+          addNotification(
+            `Bạn đã chỉnh sửa lịch khám với bác sĩ ${appointments[index].doctorName} từ ${oldDate}, ${oldTime} thành ${newDate}, ${newTime}`
+          );
+
+          // Cập nhật danh sách lịch khám
+          updateAppointmentsList();
+
+          // Hiển thị thông báo thành công
+          showNotification("Đã cập nhật lịch khám thành công");
+
+          // Đóng modal
+          closeEditModal();
+        }
+      }
+
+      function showNotification(message) {
+        const notification = document.getElementById("notification");
+        notification.textContent = message;
+        notification.style.display = "block";
+
+        // Tự động ẩn thông báo sau 3 giây
+        setTimeout(() => {
+          notification.style.display = "none";
+        }, 3000);
+      }
+
+      function logout() {
+        window.location.href = "Dangnhap.html";
+      }
+
+      function showTab(tabId) {
+        // Ẩn tất cả các tab
+        const tabContents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabContents.length; i++) {
+          tabContents[i].classList.remove("active");
+          tabContents[i].style.display = "none";
+        }
+        // Hiển thị tab được chọn
+        // Hiển thị tab được chọn
+        const selectedTab = document.getElementById(tabId);
+        selectedTab.classList.add("active");
+        selectedTab.style.display = "block";
+
+        // Đánh dấu menu item được chọn
+        const menuItems = document.getElementsByClassName("menu-item");
+        for (let i = 0; i < menuItems.length; i++) {
+          menuItems[i].classList.remove("active");
+        }
+
+        // Tìm và đánh dấu menu item tương ứng với tab
+        for (let i = 0; i < menuItems.length; i++) {
+          if (
+            menuItems[i].getAttribute("onclick") &&
+            menuItems[i].getAttribute("onclick").includes(tabId)
+          ) {
+            menuItems[i].classList.add("active");
+          }
+        }
+
+        // Cập nhật dữ liệu tương ứng với tab được chọn
+        if (tabId === "appointments") {
+          updateAppointmentsList();
+        } else if (tabId === "notifications") {
+          updateNotificationList();
+        } else if (tabId === "profile") {
+          updateMedicalHistory();
+        } else if (tabId === "findDoctor") {
+          // Có thể thêm các xử lý đặc biệt cho tab tìm bác sĩ nếu cần
+        }
+      }
+      // Initialize the page
+      document.addEventListener("DOMContentLoaded", () => {
+        const style = document.createElement("style");
+        style.textContent = `
+    .button-edit {
+      background-color: #2196F3;
+      color: white;
+      margin-right: 5px;
+    }
+
+    .star-rating {
+      display: inline-flex;
+    }
+
+    .star-rating .fas.fa-star {
+      color: #ddd; /* Màu mặc định là xám nhạt */
+      font-size: 24px;
+      padding: 0 2px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star-rating .fas.fa-star:hover,
+    .star-rating .fas.fa-star:hover ~ .fas.fa-star {
+      color: #FFD700; /* Màu vàng khi hover */
+    }
+
+    .star-rating .fas.fa-star.active {
+      color: #FFD700; /* Màu vàng khi đã đánh giá */
+    }
+  `;
+        document.head.appendChild(style);
+        // Đặt ngày mặc định là ngày hiện tại
+        const today = new Date();
+        const formattedDate = today.toISOString().split("T")[0];
+        document.getElementById("date").value = formattedDate;
+
+        // Ẩn danh sách bác sĩ khi mới vào trang
+        document.getElementById("doctorListSection").style.display = "none";
+
+        // Ẩn tất cả các tab khác khi mới vào trang
+        const tabContents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabContents.length; i++) {
+          tabContents[i].classList.remove("active");
+          tabContents[i].style.display = "none";
+        }
+
+        // Hiển thị tab findDoctor mặc định
+        const findDoctorTab = document.getElementById("findDoctor");
+        findDoctorTab.classList.add("active");
+        findDoctorTab.style.display = "block";
+
+        // Khởi tạo dữ liệu thông báo mẫu
+        if (notifications.length === 0) {
+          addNotification("Chào mừng bạn đến với hệ thống đặt lịch khám bệnh");
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,2623 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ thống quản lý của bác sĩ</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-light: #4895ef;
+        --primary-dark: #3f37c9;
+        --secondary: #3a0ca3;
+        --success: #38b000;
+        --success-light: #70e000;
+        --warning: #ffaa00;
+        --warning-light: #ffdd00;
+        --danger: #d90429;
+        --danger-light: #ef233c;
+        --background: #f8f9fa;
+        --background-alt: #e9ecef;
+        --text: #212529;
+        --text-light: #6c757d;
+        --white: #ffffff;
+        --border: #dee2e6;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-dark: rgba(0, 0, 0, 0.15);
+        --card-background: #ffffff;
+        --hover-background: #f1f3f9;
+        --border-radius: 10px;
+        --border-radius-sm: 6px;
+        --transition: all 0.3s ease;
+        --font-main: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: var(--font-main);
+      }
+
+      body {
+        display: flex;
+        background: var(--background);
+        min-height: 100vh;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--background);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--primary-light);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary);
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 260px;
+        background: var(--white);
+        height: 100vh;
+        padding: 24px 16px;
+        box-shadow: 2px 0 10px var(--shadow);
+        position: fixed;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--border);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 5px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 20px;
+      }
+
+      .logo img {
+        max-width: 100%;
+        height: auto;
+        transition: var(--transition);
+      }
+
+      .logo img:hover {
+        transform: scale(1.05);
+      }
+
+      .menu-item {
+        padding: 14px 18px;
+        margin: 6px 0;
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      .menu-item i {
+        font-size: 16px;
+        width: 20px;
+        text-align: center;
+      }
+
+      .menu-item:hover {
+        background: var(--hover-background);
+        color: var(--primary);
+        transform: translateX(5px);
+      }
+
+      .menu-item::after {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 0;
+        background: var(--primary);
+        left: 0;
+        top: 0;
+        transition: var(--transition);
+      }
+
+      .menu-item:hover::after {
+        height: 100%;
+      }
+
+      .menu-item.active {
+        background: var(--primary);
+        color: var(--white);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      }
+
+      .menu-item.active::after {
+        height: 100%;
+        background: var(--secondary);
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+        border-top: 1px solid var(--border);
+        padding-top: 15px;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: 260px;
+        padding: 25px;
+        width: calc(100% - 260px);
+        max-width: 1600px;
+        transition: var(--transition);
+      }
+
+      /* Header */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding: 20px 25px;
+        background: var(--card-background);
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 12px var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(
+          to right,
+          var(--primary),
+          var(--primary-light)
+        );
+      }
+
+      .header h2 {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--primary-dark);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+        padding: 8px 15px;
+        background: var(--hover-background);
+        border-radius: 20px;
+        color: var(--primary);
+      }
+
+      .user-info i {
+        font-size: 18px;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--card-background);
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 15px var(--shadow);
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+      }
+
+      .card:hover {
+        box-shadow: 0 7px 20px var(--shadow-dark);
+        transform: translateY(-2px);
+      }
+
+      .card h3 {
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+        font-size: 18px;
+        color: var(--primary-dark);
+        font-weight: 600;
+      }
+
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        border: 1px solid var(--border);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+      }
+
+      thead {
+        background: var(--primary-light);
+        color: var(--white);
+      }
+
+      th,
+      td {
+        padding: 12px 16px;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+
+      tr:nth-child(even) {
+        background-color: var(--hover-background);
+      }
+
+      tr:hover {
+        background-color: var(--primary-light);
+        color: var(--white);
+      }
+
+      tbody tr {
+        transition: var(--transition);
+        border-bottom: 1px solid var(--border);
+      }
+
+      /* Buttons */
+      .button {
+        padding: 9px 18px;
+        border: none;
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+        font-size: 13px;
+        margin-right: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        box-shadow: 0 2px 5px var(--shadow);
+      }
+
+      .button i {
+        font-size: 14px;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px var(--shadow-dark);
+      }
+
+      .button:active {
+        transform: translateY(0);
+      }
+
+      .button-primary {
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      .button-primary:hover {
+        background: var(--primary-dark);
+      }
+
+      .button-success {
+        background: var(--success);
+        color: var(--white);
+      }
+
+      .button-success:hover {
+        background: var(--success-light);
+      }
+
+      .button-warning {
+        background: var(--warning);
+        color: var(--white);
+      }
+
+      .button-warning:hover {
+        background: var(--warning-light);
+      }
+
+      .button-danger {
+        background: var(--danger);
+        color: var(--white);
+      }
+
+      .button-danger:hover {
+        background: var(--danger-light);
+      }
+
+      .button-outline {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--primary);
+      }
+
+      .button-outline:hover {
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      /* Notifications */
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: var(--border-radius-sm);
+        background: var(--white);
+        color: var(--primary);
+        box-shadow: 0 5px 15px var(--shadow-dark);
+        display: none;
+        z-index: 1000;
+        border-left: 4px solid var(--primary);
+        font-weight: 500;
+        min-width: 300px;
+        max-width: 450px;
+        animation: slideIn 0.3s forwards;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Modals */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .modal.open {
+        opacity: 1;
+      }
+
+      .modal-content {
+        background: var(--white);
+        padding: 30px;
+        border-radius: var(--border-radius);
+        width: 90%;
+        max-width: 650px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px var(--shadow-dark);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        position: relative;
+      }
+
+      .modal.open .modal-content {
+        transform: scale(1);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .modal-header h3 {
+        font-size: 20px;
+        color: var(--primary-dark);
+        font-weight: 600;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .close {
+        cursor: pointer;
+        font-size: 24px;
+        color: var(--text-light);
+        transition: var(--transition);
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+
+      .close:hover {
+        color: var(--danger);
+        background: rgba(217, 4, 41, 0.1);
+      }
+
+      /* Forms */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--border-radius-sm);
+        font-size: 14px;
+        transition: var(--transition);
+        color: var(--text);
+        background-color: var(--white);
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      /* Tabs */
+      .tab-container {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .tab {
+        padding: 12px 20px;
+        cursor: pointer;
+        background: var(--background-alt);
+        border-radius: 10px 10px 0 0;
+        margin-right: 5px;
+        font-weight: 500;
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+
+      .tab:hover {
+        background: var(--hover-background);
+        color: var(--primary);
+      }
+
+      .tab.active {
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.3s forwards;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Status badges */
+      .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+      }
+
+      .status-pending {
+        background: #fff8e6;
+        color: #996600;
+        border: 1px solid #ffcc66;
+      }
+
+      .status-confirmed {
+        background: #e6f7e6;
+        color: #277227;
+        border: 1px solid #99d699;
+      }
+
+      .status-cancelled {
+        background: #fde6e9;
+        color: #8b0017;
+        border: 1px solid #f28b9c;
+      }
+
+      .status-completed {
+        background: #e6f0ff;
+        color: #003380;
+        border: 1px solid #99c2ff;
+      }
+
+      /* Search bar */
+      .search-bar {
+        display: flex;
+        margin-bottom: 20px;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .search-bar input {
+        flex: 1;
+        margin-right: 10px;
+        padding-left: 40px;
+        position: relative;
+        box-shadow: 0 2px 5px var(--shadow);
+      }
+
+      .search-bar::before {
+        content: "\f002";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        left: 15px;
+        top: 12px;
+        color: var(--text-light);
+        z-index: 1;
+      }
+
+      /* Working hours grid */
+      .working-hours-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .day-column {
+        background: var(--background-alt);
+        padding: 15px;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 8px var(--shadow);
+        transition: var(--transition);
+      }
+
+      .day-column:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px var(--shadow-dark);
+      }
+
+      .day-header {
+        font-weight: 600;
+        text-align: center;
+        padding: 10px;
+        background: var(--primary);
+        color: var(--white);
+        border-radius: var(--border-radius-sm);
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        box-shadow: 0 3px 5px rgba(67, 97, 238, 0.2);
+        letter-spacing: 1px;
+      }
+
+      .time-slot {
+        background: var(--white);
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: var(--border-radius-sm);
+        box-shadow: 0 1px 5px var(--shadow);
+        position: relative;
+        transition: var(--transition);
+        border-left: 3px solid var(--primary);
+      }
+
+      .time-slot:hover {
+        transform: translateX(5px);
+        background: var(--hover-background);
+      }
+
+      .time-slot strong {
+        color: var(--primary-dark);
+      }
+
+      .time-slot-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 8px;
+        gap: 15px;
+      }
+
+      .small-icon {
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--text-light);
+        transition: var(--transition);
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+
+      .small-icon:hover {
+        color: var(--primary);
+        background: rgba(67, 97, 238, 0.1);
+      }
+
+      /* Medical records */
+      .medical-record {
+        border-left: 4px solid var(--primary);
+        padding: 15px;
+        margin-bottom: 20px;
+        background: var(--white);
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+        box-shadow: 0 3px 10px var(--shadow);
+        transition: var(--transition);
+      }
+
+      .medical-record:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px var(--shadow-dark);
+      }
+
+      .medical-record-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+        font-weight: 600;
+      }
+
+      .badge-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .badge {
+        background: var(--hover-background);
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        color: var(--primary);
+        font-weight: 500;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 992px) {
+        .sidebar {
+          width: 220px;
+        }
+        .main-content {
+          margin-left: 220px;
+          width: calc(100% - 220px);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 80px;
+          padding: 20px 10px;
+        }
+        .logo {
+          justify-content: center;
+        }
+        .logo img {
+          width: 50px;
+        }
+        .menu-item span {
+          display: none;
+        }
+        .menu-item {
+          justify-content: center;
+          padding: 15px;
+        }
+        .menu-item i {
+          font-size: 20px;
+          margin: 0;
+        }
+        .main-content {
+          margin-left: 80px;
+          width: calc(100% - 80px);
+          padding: 15px;
+        }
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+        .working-hours-grid {
+          grid-template-columns: 1fr;
+        }
+        .search-bar {
+          flex-direction: column;
+        }
+        .search-bar button {
+          width: 100%;
+        }
+      }
+
+      /* Animations */
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .pulse {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in-up {
+        animation: fadeInUp 0.5s forwards;
+      }
+
+      /* Dark Theme Toggle (Preparation) */
+      .theme-toggle {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 3px 10px var(--shadow-dark);
+        z-index: 100;
+        transition: var(--transition);
+      }
+
+      .theme-toggle:hover {
+        transform: rotate(30deg);
+      }
+
+      /* Additional Styling Improvements */
+      .stat-card {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        box-shadow: 0 3px 10px var(--shadow);
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px var(--shadow-dark);
+      }
+
+      .stat-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 48px;
+        opacity: 0.1;
+        color: var(--primary);
+      }
+
+      .stat-value {
+        font-size: 30px;
+        font-weight: 700;
+        margin: 10px 0;
+        color: var(--primary-dark);
+      }
+
+      .stat-label {
+        color: var(--text-light);
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      /* Input groups */
+      .input-group {
+        display: flex;
+        position: relative;
+      }
+
+      .input-group input {
+        border-radius: var(--border-radius-sm) 0 0 var(--border-radius-sm);
+      }
+
+      .input-group-append {
+        display: flex;
+      }
+
+      .input-group-append .button {
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+        margin: 0;
+      }
+
+      /* Calendar styling */
+      .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        margin-top: 20px;
+      }
+
+      .calendar-header {
+        grid-column: span 7;
+        text-align: center;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--primary-dark);
+      }
+
+      .calendar-day {
+        text-align: center;
+        padding: 10px;
+        background: var(--background-alt);
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+      }
+
+      .calendar-date {
+        height: 100px;
+        background: var(--white);
+        border-radius: var(--border-radius-sm);
+        padding: 5px;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .calendar-date:hover {
+        background: var(--hover-background);
+        transform: scale(1.05);
+        z-index: 1;
+      }
+
+      .calendar-date.today {
+        border: 2px solid var(--primary);
+      }
+
+      .calendar-date.has-events::after {
+        content: "";
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 5px;
+        height: 5px;
+        background: var(--primary);
+        border-radius: 50%;
+      }
+
+      .date-number {
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      /* Tooltips */
+      [data-tooltip] {
+        position: relative;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .modal.open {
+        opacity: 1;
+      }
+
+      .modal-content {
+        background: var(--white);
+        padding: 30px;
+        border-radius: var(--border-radius);
+        width: 90%;
+        max-width: 650px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px var(--shadow-dark);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        position: relative;
+      }
+
+      .modal.open .modal-content {
+        transform: scale(1);
+      }
+      [data-tooltip]::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 10px;
+        background: var(--text);
+        color: var(--white);
+        border-radius: var(--border-radius-sm);
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+        z-index: 10;
+      }
+
+      [data-tooltip]:hover::before {
+        opacity: 1;
+        visibility: visible;
+        bottom: calc(100% + 5px);
+      }
+      /* Header actions và nút thông báo */
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .notification-button {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--hover-background);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .notification-button i {
+        font-size: 18px;
+        color: var(--primary);
+      }
+
+      .notification-button:hover {
+        background: rgba(67, 97, 238, 0.15);
+        transform: scale(1.1);
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: var(--danger);
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+      }
+
+      /* Pop-up thông báo lịch hẹn mới */
+      .notifications-popup {
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        width: 350px;
+        background: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: 0 5px 20px var(--shadow-dark);
+        z-index: 100;
+        display: none;
+        overflow: hidden;
+        animation: slideInDown 0.3s forwards;
+      }
+
+      @keyframes slideInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .notifications-header {
+        padding: 15px;
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .notifications-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .notification-item {
+        padding: 15px;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .notification-item:hover {
+        background: var(--hover-background);
+      }
+
+      .notification-item:last-child {
+        border-bottom: none;
+      }
+
+      .notification-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--primary-dark);
+      }
+
+      .notification-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-light);
+      }
+
+      .notification-time {
+        font-style: italic;
+      }
+
+      .notification-footer {
+        padding: 10px;
+        text-align: center;
+        background: var(--background-alt);
+        font-weight: 500;
+        color: var(--primary);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .notification-footer:hover {
+        background: var(--primary);
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="logo">
+        <img
+          width="200"
+          height="50"
+          src="Screenshot 2025-03-06 235118.png"
+          class="header_logo header-logo"
+          alt="Valeo"
+        />
+      </div>
+
+      <div class="menu-item active" onclick="showTab('appointments')">
+        <i class="fas fa-calendar-alt"></i>
+        Lịch hẹn
+      </div>
+      <div class="menu-item" onclick="showTab('workingHours')">
+        <i class="fas fa-clock"></i>
+        Lịch làm việc
+      </div>
+      <div class="menu-item" onclick="showTab('medicalRecords')">
+        <i class="fas fa-file-medical"></i>
+        Hồ sơ khám bệnh
+      </div>
+      <div class="menu-item" onclick="showTab('profile')">
+        <i class="fas fa-user"></i>
+        Hồ sơ bác sĩ
+      </div>
+      <div class="menu-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        Đăng xuất
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="header">
+        <h2 id="pageTitle">Quản lý lịch hẹn</h2>
+        <div class="header-actions">
+          <div class="notification-button" onclick="showNewAppointments()">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge">3</span>
+          </div>
+          <div class="user-info">
+            <i class="fas fa-user-md"></i> Lâm việt Hoàng
+          </div>
+        </div>
+      </div>
+      <div class="notifications-popup" id="notificationsPopup">
+        <div class="notifications-header">
+          <span>Thông báo mới</span>
+          <i class="fas fa-times" onclick="hideNewAppointments()"></i>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+          <!-- Thông báo sẽ được thêm ở đây -->
+        </div>
+        <div class="notification-footer" onclick="markAllAsRead()">
+          Đánh dấu tất cả đã đọc
+        </div>
+      </div>
+      <!-- Tab: Lịch hẹn -->
+      <div id="appointments" class="tab-content active">
+        <div class="card">
+          <div class="search-bar">
+            <input
+              type="text"
+              id="appointmentSearch"
+              placeholder="Tìm kiếm bệnh nhân..."
+              onkeyup="searchAppointments()"
+            />
+            <button
+              class="button button-primary"
+              onclick="filterAppointments('all')"
+            >
+              Tất cả
+            </button>
+            <button
+              class="button button-primary"
+              onclick="filterAppointments('pending')"
+            >
+              Chờ xác nhận
+            </button>
+            <button
+              class="button button-success"
+              onclick="filterAppointments('confirmed')"
+            >
+              Đã xác nhận
+            </button>
+            <button
+              class="button button-danger"
+              onclick="filterAppointments('cancelled')"
+            >
+              Đã hủy
+            </button>
+          </div>
+
+          <h3>Danh sách lịch hẹn</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Bệnh nhân</th>
+                <th>Ngày</th>
+                <th>Thời gian</th>
+                <th>Lý do khám</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="appointmentsList"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Lịch làm việc -->
+      <div id="workingHours" class="tab-content">
+        <div class="card">
+          <div class="modal-header">
+            <h3>Quản lý lịch làm việc</h3>
+            <button
+              class="button button-primary"
+              onclick="openAddTimeSlotModal()"
+            >
+              <i class="fas fa-plus"></i> Thêm ca làm việc
+            </button>
+          </div>
+
+          <div class="working-hours-grid" id="workingHoursGrid"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Hồ sơ khám bệnh -->
+      <div id="medicalRecords" class="tab-content">
+        <div class="card">
+          <div class="search-bar">
+            <input
+              type="text"
+              id="medicalRecordSearch"
+              placeholder="Tìm kiếm bệnh nhân..."
+              onkeyup="searchMedicalRecords()"
+            />
+            <button
+              class="button button-primary"
+              onclick="openAddMedicalRecordModal()"
+            >
+              <i class="fas fa-plus"></i> Thêm hồ sơ mới
+            </button>
+          </div>
+
+          <h3>Danh sách hồ sơ khám bệnh</h3>
+          <div id="medicalRecordsList"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Hồ sơ bác sĩ -->
+      <div id="profile" class="tab-content">
+        <div class="card">
+          <h3>Thông tin cá nhân</h3>
+          <form id="doctorProfileForm">
+            <div class="form-group">
+              <label for="doctorName">Họ và tên</label>
+              <input type="text" id="doctorName" value="Lâm Việt Hoàng" />
+            </div>
+            <div class="form-group">
+              <label for="doctorSpecialty">Chuyên khoa</label>
+              <input type="text" id="doctorSpecialty" value="Nội tổng quát" />
+            </div>
+            <div class="form-group">
+              <label for="doctorPhone">Số điện thoại</label>
+              <input type="text" id="doctorPhone" value="0376376794" />
+            </div>
+            <div class="form-group">
+              <label for="doctorEmail">Email</label>
+              <input
+                type="email"
+                id="doctorEmail"
+                value="Hoangvutru@gmail.com"
+              />
+            </div>
+            <div class="form-group">
+              <label for="doctorBio">Giới thiệu bản thân</label>
+              <textarea id="doctorBio">
+Bác sĩ Lâm Việt Hoàng có hơn 10 năm kinh nghiệm trong lĩnh vực Nội tổng quát. Tốt nghiệp Đại học Y Hà Nội, từng công tác tại Bệnh viện Bạch Mai.</textarea
+              >
+            </div>
+            <button
+              type="button"
+              class="button button-primary"
+              onclick="saveProfile()"
+            >
+              Lưu thông tin
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thông báo -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Modal xác nhận lịch hẹn -->
+    <div id="confirmAppointmentModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Xác nhận lịch hẹn</h3>
+          <span class="close" onclick="closeModal('confirmAppointmentModal')"
+            >&times;</span
+          >
+        </div>
+        <form id="confirmAppointmentForm">
+          <input type="hidden" id="confirmAppointmentId" />
+          <div class="form-group">
+            <label for="confirmDate">Ngày khám</label>
+            <input type="date" id="confirmDate" required />
+          </div>
+          <div class="form-group">
+            <label for="confirmTime">Giờ khám</label>
+            <input type="time" id="confirmTime" required />
+          </div>
+          <div class="form-group">
+            <label for="confirmNotes">Ghi chú (nếu có)</label>
+            <textarea id="confirmNotes"></textarea>
+          </div>
+          <button
+            type="button"
+            class="button button-success"
+            onclick="saveConfirmAppointment()"
+          >
+            Xác nhận lịch hẹn
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal thêm ca làm việc -->
+    <div id="addTimeSlotModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Thêm ca làm việc mới</h3>
+          <span class="close" onclick="closeModal('addTimeSlotModal')"
+            >&times;</span
+          >
+        </div>
+        <form id="addTimeSlotForm">
+          <div class="form-group">
+            <label for="timeSlotDay">Ngày trong tuần</label>
+            <select id="timeSlotDay" required>
+              <option value="Thứ 2">Thứ 2</option>
+              <option value="Thứ 3">Thứ 3</option>
+              <option value="Thứ 4">Thứ 4</option>
+              <option value="Thứ 5">Thứ 5</option>
+              <option value="Thứ 6">Thứ 6</option>
+              <option value="Thứ 7">Thứ 7</option>
+              <option value="Chủ nhật">Chủ nhật</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="timeSlotStart">Thời gian bắt đầu</label>
+            <input type="time" id="timeSlotStart" required />
+          </div>
+          <div class="form-group">
+            <label for="timeSlotEnd">Thời gian kết thúc</label>
+            <input type="time" id="timeSlotEnd" required />
+          </div>
+          <div class="form-group">
+            <label for="timeSlotMaxPatients">Số lượng bệnh nhân tối đa</label>
+            <input
+              type="number"
+              id="timeSlotMaxPatients"
+              min="1"
+              value="5"
+              required
+            />
+          </div>
+          <button
+            type="button"
+            class="button button-primary"
+            onclick="saveTimeSlot()"
+          >
+            Lưu ca làm việc
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal chỉnh sửa ca làm việc -->
+    <div id="editTimeSlotModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Chỉnh sửa ca làm việc</h3>
+          <span class="close" onclick="closeModal('editTimeSlotModal')"
+            >&times;</span
+          >
+        </div>
+        <form id="editTimeSlotForm">
+          <input type="hidden" id="editTimeSlotId" />
+          <div class="form-group">
+            <label for="editTimeSlotDay">Ngày trong tuần</label>
+            <select id="editTimeSlotDay" required>
+              <option value="Thứ 2">Thứ 2</option>
+              <option value="Thứ 3">Thứ 3</option>
+              <option value="Thứ 4">Thứ 4</option>
+              <option value="Thứ 5">Thứ 5</option>
+              <option value="Thứ 6">Thứ 6</option>
+              <option value="Thứ 7">Thứ 7</option>
+              <option value="Chủ nhật">Chủ nhật</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editTimeSlotStart">Thời gian bắt đầu</label>
+            <input type="time" id="editTimeSlotStart" required />
+          </div>
+          <div class="form-group">
+            <label for="editTimeSlotEnd">Thời gian kết thúc</label>
+            <input type="time" id="editTimeSlotEnd" required />
+          </div>
+          <div class="form-group">
+            <label for="editTimeSlotMaxPatients"
+              >Số lượng bệnh nhân tối đa</label
+            >
+            <input
+              type="number"
+              id="editTimeSlotMaxPatients"
+              min="1"
+              required
+            />
+          </div>
+          <button
+            type="button"
+            class="button button-primary"
+            onclick="updateTimeSlot()"
+          >
+            Cập nhật
+          </button>
+          <button
+            type="button"
+            class="button button-danger"
+            onclick="deleteTimeSlot()"
+          >
+            Xóa ca làm việc
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal thêm hồ sơ khám bệnh -->
+    <div id="addMedicalRecordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Thêm hồ sơ khám bệnh</h3>
+          <span class="close" onclick="closeModal('addMedicalRecordModal')"
+            >&times;</span
+          >
+        </div>
+        <form id="addMedicalRecordForm">
+          <div class="form-group">
+            <label for="medicalRecordPatient">Tên bệnh nhân</label>
+            <input type="text" id="medicalRecordPatient" required />
+          </div>
+          <div class="form-group">
+            <label for="medicalRecordDate">Ngày khám</label>
+            <input type="date" id="medicalRecordDate" required />
+          </div>
+          <div class="form-group">
+            <label for="medicalRecordSymptoms">Triệu chứng</label>
+            <textarea id="medicalRecordSymptoms" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="medicalRecordDiagnosis">Chẩn đoán</label>
+            <textarea id="medicalRecordDiagnosis" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="medicalRecordTreatment">Phương pháp điều trị</label>
+            <textarea id="medicalRecordTreatment" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="medicalRecordPrescription">Đơn thuốc</label>
+            <textarea id="medicalRecordPrescription"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="medicalRecordNotes">Ghi chú bổ sung</label>
+            <textarea id="medicalRecordNotes"></textarea>
+          </div>
+          <button
+            type="button"
+            class="button button-primary"
+            onclick="saveMedicalRecord()"
+          >
+            Lưu hồ sơ
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal xem chi tiết hồ sơ khám bệnh -->
+    <div id="viewMedicalRecordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Chi tiết hồ sơ khám bệnh</h3>
+          <span class="close" onclick="closeModal('viewMedicalRecordModal')"
+            >&times;</span
+          >
+        </div>
+        <div id="medicalRecordDetails"></div>
+        <button
+          type="button"
+          class="button button-primary"
+          onclick="openEditMedicalRecord()"
+        >
+          Chỉnh sửa
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal chỉnh sửa hồ sơ khám bệnh -->
+    <div id="editMedicalRecordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Chỉnh sửa hồ sơ khám bệnh</h3>
+          <span class="close" onclick="closeModal('editMedicalRecordModal')"
+            >&times;</span
+          >
+        </div>
+        <form id="editMedicalRecordForm">
+          <input type="hidden" id="editMedicalRecordId" />
+          <div class="form-group">
+            <label for="editMedicalRecordPatient">Tên bệnh nhân</label>
+            <input type="text" id="editMedicalRecordPatient" required />
+          </div>
+          <div class="form-group">
+            <label for="editMedicalRecordDate">Ngày khám</label>
+            <input type="date" id="editMedicalRecordDate" required />
+          </div>
+          <div class="form-group">
+            <label for="editMedicalRecordSymptoms">Triệu chứng</label>
+            <textarea id="editMedicalRecordSymptoms" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editMedicalRecordDiagnosis">Chẩn đoán</label>
+            <textarea id="editMedicalRecordDiagnosis" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editMedicalRecordTreatment">Phương pháp điều trị</label>
+            <textarea id="editMedicalRecordTreatment" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editMedicalRecordPrescription">Đơn thuốc</label>
+            <textarea id="editMedicalRecordPrescription"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editMedicalRecordNotes">Ghi chú bổ sung</label>
+            <textarea id="editMedicalRecordNotes"></textarea>
+          </div>
+          <button
+            type="button"
+            class="button button-primary"
+            onclick="updateMedicalRecord()"
+          >
+            Cập nhật hồ sơ
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Dữ liệu mẫu cho lịch hẹn
+      let appointments = [
+        {
+          id: 1,
+          patient: "Nguyễn Minh Quang",
+          date: "2023-10-01",
+          time: "10:00",
+          reason: "Khám sức khỏe định kỳ",
+          status: "pending",
+        },
+        {
+          id: 2,
+          patient: "Trần Thị Minh",
+          date: "2023-10-02",
+          time: "11:00",
+          reason: "Đau đầu, sốt nhẹ",
+          status: "confirmed",
+        },
+        {
+          id: 3,
+          patient: "Lê Văn Hòa",
+          date: "2023-10-03",
+          time: "14:30",
+          reason: "Theo dõi huyết áp",
+          status: "cancelled",
+        },
+        {
+          id: 4,
+          patient: "Phạm Thị Lan",
+          date: "2023-10-04",
+          time: "09:00",
+          reason: "Đau lưng",
+          status: "confirmed",
+        },
+        {
+          id: 5,
+          patient: "Hoàng Văn Nam",
+          date: "2023-10-05",
+          time: "16:00",
+          reason: "Tái khám sau điều trị",
+          status: "pending",
+        },
+      ];
+
+      // Dữ liệu mẫu cho lịch làm việc
+      let workingHours = [
+        {
+          id: 1,
+          day: "Thứ 2",
+          start: "08:00",
+          end: "12:00",
+          maxPatients: 10,
+        },
+        {
+          id: 2,
+          day: "Thứ 2",
+          start: "13:30",
+          end: "17:30",
+          maxPatients: 8,
+        },
+        {
+          id: 3,
+          day: "Thứ 3",
+          start: "08:00",
+          end: "12:00",
+          maxPatients: 10,
+        },
+        {
+          id: 4,
+          day: "Thứ 3",
+          start: "13:30",
+          end: "17:30",
+          maxPatients: 8,
+        },
+        {
+          id: 5,
+          day: "Thứ 4",
+          start: "08:00",
+          end: "12:00",
+          maxPatients: 10,
+        },
+        {
+          id: 6,
+          day: "Thứ 5",
+          start: "13:30",
+          end: "17:30",
+          maxPatients: 8,
+        },
+        {
+          id: 7,
+          day: "Thứ 6",
+          start: "08:00",
+          end: "12:00",
+          maxPatients: 10,
+        },
+      ];
+
+      // Dữ liệu mẫu cho hồ sơ khám bệnh
+      let medicalRecords = [
+        {
+          id: 1,
+          patient: "Nguyễn Minh Quang",
+          date: "2023-09-25",
+          symptoms: "Đau đầu, hoa mắt, chóng mặt khi đứng lên nhanh.",
+          diagnosis: "Huyết áp thấp",
+          treatment:
+            "Nghỉ ngơi, bổ sung muối trong khẩu phần ăn, tránh đứng lên nhanh.",
+          prescription:
+            "Viên bổ sung muối và khoáng chất, uống 2 viên/ngày sau bữa ăn sáng.",
+          notes: "Tái khám sau 2 tuần",
+        },
+        {
+          id: 2,
+          patient: "Trần Thị Minh",
+          date: "2023-09-15",
+          symptoms: "Sốt nhẹ, đau họng, ho có đờm.",
+          diagnosis: "Viêm họng cấp",
+          treatment:
+            "Nghỉ ngơi, uống nhiều nước, súc họng với nước muối sinh lý.",
+          prescription:
+            "Paracetamol 500mg, uống khi sốt trên 38.5°C. Kháng sinh Amoxicillin 500mg, uống 2 lần/ngày trong 5 ngày.",
+          notes: "Nếu không đỡ sau 3 ngày, quay lại khám.",
+        },
+        {
+          id: 3,
+          patient: "Lê Văn Hòa",
+          date: "2023-09-20",
+          symptoms: "Đau lưng vùng thắt lưng, tăng khi vận động mạnh.",
+          diagnosis: "Đau lưng cơ năng",
+          treatment: "Hạn chế vận động mạnh, tập các bài tập vật lý trị liệu.",
+          prescription:
+            "Thuốc giảm đau Mobic 7.5mg, uống 1 viên/ngày sau bữa ăn sáng trong 5 ngày.",
+          notes: "Đã hướng dẫn các bài tập vật lý trị liệu cơ bản.",
+        },
+      ];
+
+      // Biến lưu trữ ID của mục hiện tại đang xem/chỉnh sửa
+      let currentMedicalRecordId = null;
+
+      // Hàm khởi tạo khi tải trang
+      document.addEventListener("DOMContentLoaded", function () {
+        loadAppointments();
+        loadWorkingHours();
+        loadMedicalRecords();
+      });
+
+      // Hiển thị tab được chọn
+      function showTab(tabId) {
+        // Ẩn tất cả các tab
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Hiển thị tab được chọn
+        document.getElementById(tabId).classList.add("active");
+
+        // Cập nhật trạng thái active của menu
+        document.querySelectorAll(".menu-item").forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        // Tìm menu item tương ứng và đặt active
+        const menuItems = document.querySelectorAll(".menu-item");
+        for (let item of menuItems) {
+          if (item.getAttribute("onclick").includes(tabId)) {
+            item.classList.add("active");
+          }
+        }
+
+        // Cập nhật tiêu đề trang
+        let pageTitle = document.getElementById("pageTitle");
+        switch (tabId) {
+          case "appointments":
+            pageTitle.textContent = "Quản lý lịch hẹn";
+            break;
+          case "workingHours":
+            pageTitle.textContent = "Lịch làm việc";
+            break;
+          case "medicalRecords":
+            pageTitle.textContent = "Hồ sơ khám bệnh";
+            break;
+          case "profile":
+            pageTitle.textContent = "Hồ sơ bác sĩ";
+            break;
+        }
+      }
+
+      // QUẢN LÝ LỊCH HẸN
+      function loadAppointments(filter = "all") {
+        const appointmentsList = document.getElementById("appointmentsList");
+        appointmentsList.innerHTML = ""; // Xóa dữ liệu cũ
+
+        const searchTerm = document
+          .getElementById("appointmentSearch")
+          .value.toLowerCase();
+
+        appointments.forEach((appointment) => {
+          if (
+            (filter === "all" || appointment.status === filter) &&
+            (searchTerm === "" ||
+              appointment.patient.toLowerCase().includes(searchTerm))
+          ) {
+            let statusText = "";
+            let statusClass = "";
+
+            switch (appointment.status) {
+              case "pending":
+                statusText = "Chờ xác nhận";
+                statusClass = "status-pending";
+                break;
+              case "confirmed":
+                statusText = "Đã xác nhận";
+                statusClass = "status-confirmed";
+                break;
+              case "cancelled":
+                statusText = "Đã hủy";
+                statusClass = "status-cancelled";
+                break;
+              case "completed":
+                statusText = "Đã hoàn thành";
+                statusClass = "status-completed";
+                break;
+            }
+
+            appointmentsList.innerHTML += `
+              <tr>
+                <td>${appointment.patient}</td>
+                <td>${formatDate(appointment.date)}</td>
+                <td>${appointment.time}</td>
+                <td>${appointment.reason}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>
+                  ${
+                    appointment.status === "pending"
+                      ? `<button class="button button-success" onclick="openConfirmModal(${appointment.id})">Xác nhận</button>
+                     <button class="button button-danger" onclick="cancelAppointment(${appointment.id})">Hủy</button>`
+                      : appointment.status === "confirmed"
+                      ? `<button class="button button-primary" onclick="completeAppointment(${appointment.id})">Hoàn thành</button>
+                     <button class="button button-danger" onclick="cancelAppointment(${appointment.id})">Hủy</button>`
+                      : appointment.status === "completed"
+                      ? `<button class="button button-primary" onclick="createMedicalRecordFromAppointment(${appointment.id})">Tạo hồ sơ khám bệnh</button>`
+                      : ""
+                  }
+                </td>
+              </tr>
+            `;
+          }
+        });
+      }
+
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+      }
+
+      function searchAppointments() {
+        loadAppointments();
+      }
+
+      function filterAppointments(status) {
+        loadAppointments(status);
+      }
+
+      function openConfirmModal(appointmentId) {
+        const appointment = appointments.find((a) => a.id === appointmentId);
+        if (appointment) {
+          document.getElementById("confirmAppointmentId").value = appointmentId;
+          document.getElementById("confirmDate").value = appointment.date;
+          document.getElementById("confirmTime").value = appointment.time;
+          document.getElementById("confirmNotes").value = "";
+
+          openModal("confirmAppointmentModal");
+        }
+      }
+      function saveConfirmAppointment() {
+        const id = parseInt(
+          document.getElementById("confirmAppointmentId").value
+        );
+        const date = document.getElementById("confirmDate").value;
+        const time = document.getElementById("confirmTime").value;
+        const notes = document.getElementById("confirmNotes").value;
+
+        const appointmentIndex = appointments.findIndex((a) => a.id === id);
+        if (appointmentIndex !== -1) {
+          appointments[appointmentIndex].date = date;
+          appointments[appointmentIndex].time = time;
+          appointments[appointmentIndex].status = "confirmed";
+
+          showNotification(
+            `Đã xác nhận lịch hẹn với ${
+              appointments[appointmentIndex].patient
+            } vào ${formatDate(date)} lúc ${time}`
+          );
+          closeModal("confirmAppointmentModal");
+          loadAppointments();
+        }
+      }
+
+      function cancelAppointment(appointmentId) {
+        if (confirm("Bạn có chắc muốn hủy lịch hẹn này?")) {
+          const appointmentIndex = appointments.findIndex(
+            (a) => a.id === appointmentId
+          );
+          if (appointmentIndex !== -1) {
+            appointments[appointmentIndex].status = "cancelled";
+
+            showNotification(
+              `Đã hủy lịch hẹn với ${appointments[appointmentIndex].patient}`
+            );
+            loadAppointments();
+          }
+        }
+      }
+
+      function completeAppointment(appointmentId) {
+        const appointmentIndex = appointments.findIndex(
+          (a) => a.id === appointmentId
+        );
+        if (appointmentIndex !== -1) {
+          appointments[appointmentIndex].status = "completed";
+
+          showNotification(
+            `Đã hoàn thành lịch hẹn với ${appointments[appointmentIndex].patient}`
+          );
+          loadAppointments();
+        }
+      }
+
+      function createMedicalRecordFromAppointment(appointmentId) {
+        const appointment = appointments.find((a) => a.id === appointmentId);
+        if (appointment) {
+          document.getElementById("medicalRecordPatient").value =
+            appointment.patient;
+          document.getElementById("medicalRecordDate").value = appointment.date;
+          document.getElementById("medicalRecordSymptoms").value =
+            appointment.reason;
+
+          showTab("medicalRecords");
+          openAddMedicalRecordModal();
+        }
+      }
+
+      // QUẢN LÝ LỊCH LÀM VIỆC
+      function loadWorkingHours() {
+        const container = document.getElementById("workingHoursGrid");
+        container.innerHTML = "";
+
+        const days = [
+          "Thứ 2",
+          "Thứ 3",
+          "Thứ 4",
+          "Thứ 5",
+          "Thứ 6",
+          "Thứ 7",
+          "Chủ nhật",
+        ];
+
+        days.forEach((day) => {
+          const daySlots = workingHours.filter((slot) => slot.day === day);
+
+          const dayColumn = document.createElement("div");
+          dayColumn.className = "day-column";
+
+          const dayHeader = document.createElement("div");
+          dayHeader.className = "day-header";
+          dayHeader.textContent = day;
+          dayColumn.appendChild(dayHeader);
+
+          if (daySlots.length > 0) {
+            daySlots.forEach((slot) => {
+              const timeSlotElement = document.createElement("div");
+              timeSlotElement.className = "time-slot";
+              timeSlotElement.innerHTML = `
+                <strong>${slot.start} - ${slot.end}</strong>
+                <div>Tối đa: ${slot.maxPatients} bệnh nhân</div>
+                <div class="time-slot-actions">
+                  <i class="fas fa-edit small-icon" onclick="openEditTimeSlotModal(${slot.id})"></i>
+                </div>
+              `;
+              dayColumn.appendChild(timeSlotElement);
+            });
+          } else {
+            const emptySlot = document.createElement("div");
+            emptySlot.className = "time-slot";
+            emptySlot.textContent = "Không có ca làm việc";
+            dayColumn.appendChild(emptySlot);
+          }
+
+          container.appendChild(dayColumn);
+        });
+      }
+
+      function openAddTimeSlotModal() {
+        document.getElementById("addTimeSlotForm").reset();
+        openModal("addTimeSlotModal");
+      }
+      function saveTimeSlot() {
+        const day = document.getElementById("timeSlotDay").value;
+        const start = document.getElementById("timeSlotStart").value;
+        const end = document.getElementById("timeSlotEnd").value;
+        const maxPatients = parseInt(
+          document.getElementById("timeSlotMaxPatients").value
+        );
+
+        // Kiểm tra thời gian hợp lệ
+        if (start >= end) {
+          alert("Thời gian kết thúc phải sau thời gian bắt đầu");
+          return;
+        }
+
+        // Tạo ID mới
+        const newId =
+          workingHours.length > 0
+            ? Math.max(...workingHours.map((slot) => slot.id)) + 1
+            : 1;
+
+        // Thêm ca làm việc mới
+        workingHours.push({
+          id: newId,
+          day: day,
+          start: start,
+          end: end,
+          maxPatients: maxPatients,
+        });
+
+        showNotification(
+          `Đã thêm ca làm việc mới vào ${day}: ${start} - ${end}`
+        );
+        closeModal("addTimeSlotModal");
+        loadWorkingHours();
+      }
+
+      function openEditTimeSlotModal(timeSlotId) {
+        const timeSlot = workingHours.find((slot) => slot.id === timeSlotId);
+        if (timeSlot) {
+          document.getElementById("editTimeSlotId").value = timeSlotId;
+          document.getElementById("editTimeSlotDay").value = timeSlot.day;
+          document.getElementById("editTimeSlotStart").value = timeSlot.start;
+          document.getElementById("editTimeSlotEnd").value = timeSlot.end;
+          document.getElementById("editTimeSlotMaxPatients").value =
+            timeSlot.maxPatients;
+
+          openModal("editTimeSlotModal");
+        }
+      }
+
+      function updateTimeSlot() {
+        const id = parseInt(document.getElementById("editTimeSlotId").value);
+        const day = document.getElementById("editTimeSlotDay").value;
+        const start = document.getElementById("editTimeSlotStart").value;
+        const end = document.getElementById("editTimeSlotEnd").value;
+        const maxPatients = parseInt(
+          document.getElementById("editTimeSlotMaxPatients").value
+        );
+
+        // Kiểm tra thời gian hợp lệ
+        if (start >= end) {
+          alert("Thời gian kết thúc phải sau thời gian bắt đầu");
+          return;
+        }
+
+        const timeSlotIndex = workingHours.findIndex((slot) => slot.id === id);
+        if (timeSlotIndex !== -1) {
+          workingHours[timeSlotIndex].day = day;
+          workingHours[timeSlotIndex].start = start;
+          workingHours[timeSlotIndex].end = end;
+          workingHours[timeSlotIndex].maxPatients = maxPatients;
+
+          showNotification(`Đã cập nhật ca làm việc: ${day} ${start} - ${end}`);
+          closeModal("editTimeSlotModal");
+          loadWorkingHours();
+        }
+      }
+
+      function deleteTimeSlot() {
+        const id = parseInt(document.getElementById("editTimeSlotId").value);
+
+        if (confirm("Bạn có chắc muốn xóa ca làm việc này?")) {
+          const timeSlotIndex = workingHours.findIndex(
+            (slot) => slot.id === id
+          );
+          if (timeSlotIndex !== -1) {
+            workingHours.splice(timeSlotIndex, 1);
+
+            showNotification("Đã xóa ca làm việc thành công");
+            closeModal("editTimeSlotModal");
+            loadWorkingHours();
+          }
+        }
+      }
+
+      // QUẢN LÝ HỒ SƠ KHÁM BỆNH
+      function loadMedicalRecords() {
+        const container = document.getElementById("medicalRecordsList");
+        container.innerHTML = "";
+
+        const searchTerm =
+          document.getElementById("medicalRecordSearch")?.value.toLowerCase() ||
+          "";
+
+        medicalRecords
+          .filter(
+            (record) =>
+              searchTerm === "" ||
+              record.patient.toLowerCase().includes(searchTerm) ||
+              record.diagnosis.toLowerCase().includes(searchTerm)
+          )
+          .forEach((record) => {
+            const recordElement = document.createElement("div");
+            recordElement.className = "medical-record";
+            recordElement.innerHTML = `
+            <div class="medical-record-header">
+              <div>Bệnh nhân: ${record.patient}</div>
+              <div>Ngày khám: ${formatDate(record.date)}</div>
+            </div>
+            <div><strong>Chẩn đoán:</strong> ${record.diagnosis}</div>
+            <div class="badge-container">
+              <span class="badge">ID: ${record.id}</span>
+            </div>
+            <div style="margin-top: 10px;">
+              <button class="button button-primary" onclick="viewMedicalRecord(${
+                record.id
+              })">Xem chi tiết</button>
+              <button class="button button-warning" onclick="editMedicalRecord(${
+                record.id
+              })">Chỉnh sửa</button>
+              <button class="button button-danger" onclick="deleteMedicalRecord(${
+                record.id
+              })">Xóa</button>
+            </div>
+          `;
+            container.appendChild(recordElement);
+          });
+      }
+
+      function searchMedicalRecords() {
+        loadMedicalRecords();
+      }
+
+      function openAddMedicalRecordModal() {
+        document.getElementById("addMedicalRecordForm").reset();
+        document.getElementById("medicalRecordDate").value = new Date()
+          .toISOString()
+          .split("T")[0];
+        openModal("addMedicalRecordModal");
+      }
+
+      function saveMedicalRecord() {
+        const patient = document.getElementById("medicalRecordPatient").value;
+        const date = document.getElementById("medicalRecordDate").value;
+        const symptoms = document.getElementById("medicalRecordSymptoms").value;
+        const diagnosis = document.getElementById(
+          "medicalRecordDiagnosis"
+        ).value;
+        const treatment = document.getElementById(
+          "medicalRecordTreatment"
+        ).value;
+        const prescription = document.getElementById(
+          "medicalRecordPrescription"
+        ).value;
+        const notes = document.getElementById("medicalRecordNotes").value;
+
+        // Tạo ID mới
+        const newId =
+          medicalRecords.length > 0
+            ? Math.max(...medicalRecords.map((record) => record.id)) + 1
+            : 1;
+
+        // Thêm hồ sơ mới
+        medicalRecords.push({
+          id: newId,
+          patient: patient,
+          date: date,
+          symptoms: symptoms,
+          diagnosis: diagnosis,
+          treatment: treatment,
+          prescription: prescription,
+          notes: notes,
+        });
+
+        showNotification(`Đã lưu hồ sơ khám bệnh của bệnh nhân ${patient}`);
+        closeModal("addMedicalRecordModal");
+        loadMedicalRecords();
+      }
+
+      function viewMedicalRecord(recordId) {
+        const record = medicalRecords.find((r) => r.id === recordId);
+        if (record) {
+          currentMedicalRecordId = recordId;
+
+          const detailsContainer = document.getElementById(
+            "medicalRecordDetails"
+          );
+          detailsContainer.innerHTML = `
+      <div style="margin-bottom: 15px;">
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+          Bệnh nhân: ${record.patient}
+        </div>
+        <div>Ngày khám: ${formatDate(record.date)}</div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <div style="font-weight: bold;">Triệu chứng:</div>
+        <div style="white-space: pre-line;">${record.symptoms}</div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <div style="font-weight: bold;">Chẩn đoán:</div>
+        <div style="white-space: pre-line;">${record.diagnosis}</div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <div style="font-weight: bold;">Phương pháp điều trị:</div>
+        <div style="white-space: pre-line;">${record.treatment}</div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <div style="font-weight: bold;">Đơn thuốc:</div>
+        <div style="white-space: pre-line;">${
+          record.prescription || "Không có"
+        }</div>
+      </div>
+      
+      ${
+        record.notes
+          ? `
+      <div style="margin-bottom: 15px;">
+        <div style="font-weight: bold;">Ghi chú bổ sung:</div>
+        <div style="white-space: pre-line;">${record.notes}</div>
+      </div>
+      `
+          : ""
+      }
+    `;
+
+          openModal("viewMedicalRecordModal");
+        }
+      }
+
+      function openEditMedicalRecord() {
+        closeModal("viewMedicalRecordModal");
+        // Chờ modal trước đóng hẳn rồi mới mở modal mới
+        setTimeout(() => {
+          editMedicalRecord(currentMedicalRecordId);
+        }, 300);
+      }
+
+      // Cập nhật xử lý click bên ngoài modal
+      window.onclick = function (event) {
+        document.querySelectorAll(".modal").forEach((modal) => {
+          if (event.target === modal) {
+            const modalId = modal.id;
+            closeModal(modalId);
+          }
+        });
+      };
+
+      function editMedicalRecord(recordId) {
+        const record = medicalRecords.find((r) => r.id === recordId);
+        if (record) {
+          document.getElementById("editMedicalRecordId").value = recordId;
+          document.getElementById("editMedicalRecordPatient").value =
+            record.patient;
+          document.getElementById("editMedicalRecordDate").value = record.date;
+          document.getElementById("editMedicalRecordSymptoms").value =
+            record.symptoms;
+          document.getElementById("editMedicalRecordDiagnosis").value =
+            record.diagnosis;
+          document.getElementById("editMedicalRecordTreatment").value =
+            record.treatment;
+          document.getElementById("editMedicalRecordPrescription").value =
+            record.prescription || "";
+          document.getElementById("editMedicalRecordNotes").value =
+            record.notes || "";
+
+          openModal("editMedicalRecordModal");
+        }
+      }
+      function updateMedicalRecord() {
+        const id = parseInt(
+          document.getElementById("editMedicalRecordId").value
+        );
+        const patient = document.getElementById(
+          "editMedicalRecordPatient"
+        ).value;
+        const date = document.getElementById("editMedicalRecordDate").value;
+        const symptoms = document.getElementById(
+          "editMedicalRecordSymptoms"
+        ).value;
+        const diagnosis = document.getElementById(
+          "editMedicalRecordDiagnosis"
+        ).value;
+        const treatment = document.getElementById(
+          "editMedicalRecordTreatment"
+        ).value;
+        const prescription = document.getElementById(
+          "editMedicalRecordPrescription"
+        ).value;
+        const notes = document.getElementById("editMedicalRecordNotes").value;
+
+        const recordIndex = medicalRecords.findIndex((r) => r.id === id);
+        if (recordIndex !== -1) {
+          medicalRecords[recordIndex].patient = patient;
+          medicalRecords[recordIndex].date = date;
+          medicalRecords[recordIndex].symptoms = symptoms;
+          medicalRecords[recordIndex].diagnosis = diagnosis;
+          medicalRecords[recordIndex].treatment = treatment;
+          medicalRecords[recordIndex].prescription = prescription;
+          medicalRecords[recordIndex].notes = notes;
+
+          showNotification(
+            `Đã cập nhật hồ sơ khám bệnh của bệnh nhân ${patient}`
+          );
+          closeModal("editMedicalRecordModal");
+          loadMedicalRecords();
+        }
+      }
+
+      function deleteMedicalRecord(recordId) {
+        if (confirm("Bạn có chắc muốn xóa hồ sơ khám bệnh này?")) {
+          const recordIndex = medicalRecords.findIndex(
+            (r) => r.id === recordId
+          );
+          if (recordIndex !== -1) {
+            medicalRecords.splice(recordIndex, 1);
+
+            showNotification("Đã xóa hồ sơ khám bệnh thành công");
+            loadMedicalRecords();
+          }
+        }
+      }
+
+      // QUẢN LÝ HỒ SƠ BÁC SĨ
+      function saveProfile() {
+        const name = document.getElementById("doctorName").value;
+        const specialty = document.getElementById("doctorSpecialty").value;
+        const phone = document.getElementById("doctorPhone").value;
+        const email = document.getElementById("doctorEmail").value;
+        const bio = document.getElementById("doctorBio").value;
+
+        // Ở đây sẽ là phần gửi dữ liệu lên server
+        // Trong ví dụ này chỉ hiển thị thông báo
+
+        showNotification("Đã cập nhật thông tin cá nhân thành công");
+      }
+
+      // CÁC CHỨC NĂNG PHỤ TRỢ
+      function showNotification(message) {
+        const notification = document.getElementById("notification");
+        notification.textContent = message;
+        notification.style.display = "block";
+        setTimeout(() => {
+          notification.style.display = "none";
+        }, 3000);
+      }
+
+      function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove("open");
+        // Chờ animation hoàn tất trước khi ẩn modal
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, 300);
+      }
+      function logout() {
+        if (confirm("Bạn có chắc muốn đăng xuất?")) {
+          // Trong thực tế sẽ xóa phiên đăng nhập
+          window.location.href = "Dangnhap.html";
+        }
+      }
+      function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = "flex";
+        // Thêm class open để kích hoạt animation
+        setTimeout(() => {
+          modal.classList.add("open");
+        }, 10);
+      }
+
+      // Đóng modal khi click bên ngoài
+      window.onclick = function (event) {
+        document.querySelectorAll(".modal").forEach((modal) => {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+      };
+      // Dữ liệu mẫu cho thông báo lịch hẹn mới
+      let newAppointmentNotifications = [
+        {
+          id: 6,
+          patient: "Đỗ Thị Hương",
+          date: "2023-10-06",
+          time: "09:30",
+          reason: "Đau đầu kéo dài",
+          status: "pending",
+          isNew: true,
+          notifyTime: "3 phút trước",
+        },
+        {
+          id: 7,
+          patient: "Vũ Văn Thắng",
+          date: "2023-10-07",
+          time: "14:00",
+          reason: "Khám sức khỏe định kỳ",
+          status: "pending",
+          isNew: true,
+          notifyTime: "1 giờ trước",
+        },
+        {
+          id: 8,
+          patient: "Nguyễn Thị Lan Anh",
+          date: "2023-10-08",
+          time: "10:15",
+          reason: "Tái khám sau phẫu thuật",
+          status: "pending",
+          isNew: true,
+          notifyTime: "3 giờ trước",
+        },
+      ];
+
+      // Hiển thị popup thông báo lịch hẹn mới
+      function showNewAppointments() {
+        const notificationsPopup =
+          document.getElementById("notificationsPopup");
+        const notificationsList = document.getElementById("notificationsList");
+
+        // Xóa nội dung cũ
+        notificationsList.innerHTML = "";
+
+        // Thêm các thông báo mới
+        if (newAppointmentNotifications.length > 0) {
+          newAppointmentNotifications.forEach((notification) => {
+            const notificationItem = document.createElement("div");
+            notificationItem.className = "notification-item";
+            notificationItem.onclick = function () {
+              addNewAppointment(notification.id);
+              hideNewAppointments();
+            };
+
+            notificationItem.innerHTML = `
+        <div class="notification-title">Lịch hẹn mới từ ${
+          notification.patient
+        }</div>
+        <div>Ngày: ${formatDate(notification.date)} lúc ${
+              notification.time
+            }</div>
+        <div>Lý do: ${notification.reason}</div>
+        <div class="notification-meta">
+          <span class="notification-time">${notification.notifyTime}</span>
+          <span class="status-badge status-pending">Chờ xác nhận</span>
+        </div>
+      `;
+
+            notificationsList.appendChild(notificationItem);
+          });
+        } else {
+          notificationsList.innerHTML =
+            '<div class="notification-item">Không có thông báo mới</div>';
+        }
+
+        // Hiển thị popup
+        notificationsPopup.style.display = "block";
+
+        // Đóng popup khi click bên ngoài
+        document.addEventListener("click", closeNotificationsOutside);
+      }
+
+      // Đóng popup khi click bên ngoài
+      function closeNotificationsOutside(event) {
+        const notificationsPopup =
+          document.getElementById("notificationsPopup");
+        const notificationButton = document.querySelector(
+          ".notification-button"
+        );
+
+        if (
+          !notificationsPopup.contains(event.target) &&
+          !notificationButton.contains(event.target)
+        ) {
+          hideNewAppointments();
+        }
+      }
+
+      // Ẩn popup thông báo
+      function hideNewAppointments() {
+        document.getElementById("notificationsPopup").style.display = "none";
+        document.removeEventListener("click", closeNotificationsOutside);
+      }
+
+      // Thêm lịch hẹn mới vào danh sách lịch hẹn
+      function addNewAppointment(notificationId) {
+        const notification = newAppointmentNotifications.find(
+          (n) => n.id === notificationId
+        );
+
+        if (notification) {
+          // Thêm thông báo vào danh sách lịch hẹn
+          appointments.push({
+            id: notification.id,
+            patient: notification.patient,
+            date: notification.date,
+            time: notification.time,
+            reason: notification.reason,
+            status: notification.status,
+          });
+
+          // Xóa thông báo đã xử lý
+          newAppointmentNotifications = newAppointmentNotifications.filter(
+            (n) => n.id !== notificationId
+          );
+
+          // Cập nhật badge số thông báo
+          updateNotificationBadge();
+
+          // Cập nhật lại danh sách lịch hẹn
+          loadAppointments();
+
+          // Hiển thị thông báo thành công
+          showNotification(
+            `Đã thêm lịch hẹn với ${notification.patient} vào danh sách`
+          );
+        }
+      }
+
+      // Đánh dấu tất cả thông báo đã đọc
+      function markAllAsRead() {
+        // Thêm tất cả thông báo vào lịch hẹn
+        newAppointmentNotifications.forEach((notification) => {
+          appointments.push({
+            id: notification.id,
+            patient: notification.patient,
+            date: notification.date,
+            time: notification.time,
+            reason: notification.reason,
+            status: notification.status,
+          });
+        });
+
+        // Xóa tất cả thông báo
+        newAppointmentNotifications = [];
+
+        // Cập nhật badge
+        updateNotificationBadge();
+
+        // Cập nhật danh sách lịch hẹn
+        loadAppointments();
+
+        // Đóng popup
+        hideNewAppointments();
+
+        // Hiển thị thông báo
+        showNotification("Đã thêm tất cả lịch hẹn mới vào danh sách");
+      }
+
+      // Cập nhật số lượng thông báo trên badge
+      function updateNotificationBadge() {
+        const badge = document.querySelector(".notification-badge");
+        if (newAppointmentNotifications.length > 0) {
+          badge.textContent = newAppointmentNotifications.length;
+          badge.style.display = "flex";
+        } else {
+          badge.style.display = "none";
+        }
+      }
+
+      // Thêm vào hàm khởi tạo
+      document.addEventListener("DOMContentLoaded", function () {
+        // Các chức năng khởi tạo cũ
+        loadAppointments();
+        loadWorkingHours();
+        loadMedicalRecords();
+
+        // Cập nhật badge thông báo
+        updateNotificationBadge();
+      });
+    </script>
+  </body>
+</html>

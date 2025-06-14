@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-light: #4895ef;
+        --primary-dark: #3f37c9;
+        --secondary: #3a0ca3;
+        --success: #38b000;
+        --success-light: #70e000;
+        --warning: #ffaa00;
+        --warning-light: #ffdd00;
+        --danger: #d90429;
+        --danger-light: #ef233c;
+        --background: #f8f9fa;
+        --background-alt: #e9ecef;
+        --text: #212529;
+        --text-light: #6c757d;
+        --white: #ffffff;
+        --border: #dee2e6;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-dark: rgba(0, 0, 0, 0.15);
+        --card-background: #ffffff;
+        --hover-background: #f1f3f9;
+        --border-radius: 10px;
+        --border-radius-sm: 6px;
+        --transition: all 0.3s ease;
+        --font-main: "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: var(--font-main);
+      }
+
+      body {
+        display: flex;
+        background: var(--background);
+        min-height: 100vh;
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      /* Scrollbar styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--background);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--primary-light);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary);
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 260px;
+        background: var(--white);
+        height: 100vh;
+        padding: 24px 16px;
+        box-shadow: 2px 0 10px var(--shadow);
+        position: fixed;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--border);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 5px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 20px;
+      }
+
+      .logo img {
+        max-width: 100%;
+        height: auto;
+        transition: var(--transition);
+      }
+
+      .logo img:hover {
+        transform: scale(1.05);
+      }
+
+      .menu-item {
+        padding: 14px 18px;
+        margin: 6px 0;
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      .menu-item i {
+        font-size: 16px;
+        width: 20px;
+        text-align: center;
+      }
+
+      .menu-item:hover {
+        background: var(--hover-background);
+        color: var(--primary);
+        transform: translateX(5px);
+      }
+
+      .menu-item::after {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 0;
+        background: var(--primary);
+        left: 0;
+        top: 0;
+        transition: var(--transition);
+      }
+
+      .menu-item:hover::after {
+        height: 100%;
+      }
+
+      .menu-item.active {
+        background: var(--primary);
+        color: var(--white);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      }
+
+      .menu-item.active::after {
+        height: 100%;
+        background: var(--secondary);
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+        border-top: 1px solid var(--border);
+        padding-top: 15px;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: 260px;
+        padding: 25px;
+        width: calc(100% - 260px);
+        max-width: 1600px;
+        transition: var(--transition);
+      }
+
+      /* Header */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding: 20px 25px;
+        background: var(--card-background);
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 12px var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(
+          to right,
+          var(--primary),
+          var(--primary-light)
+        );
+      }
+
+      .header h2 {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--primary-dark);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+        padding: 8px 15px;
+        background: var(--hover-background);
+        border-radius: 20px;
+        color: var(--primary);
+      }
+
+      .user-info i {
+        font-size: 18px;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--card-background);
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 15px var(--shadow);
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+      }
+
+      .card:hover {
+        box-shadow: 0 7px 20px var(--shadow-dark);
+        transform: translateY(-2px);
+      }
+
+      .card h3 {
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+        font-size: 18px;
+        color: var(--primary-dark);
+        font-weight: 600;
+      }
+
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        border: 1px solid var(--border);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+      }
+
+      thead {
+        background: var(--primary-light);
+        color: var(--white);
+      }
+
+      th,
+      td {
+        padding: 12px 16px;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+      }
+
+      tr:nth-child(even) {
+        background-color: var(--hover-background);
+      }
+
+      tr:hover {
+        background-color: var(--primary-light);
+        color: var(--white);
+      }
+
+      tbody tr {
+        transition: var(--transition);
+        border-bottom: 1px solid var(--border);
+      }
+
+      /* Buttons */
+      .button {
+        padding: 9px 18px;
+        border: none;
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+        font-size: 13px;
+        margin-right: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        box-shadow: 0 2px 5px var(--shadow);
+      }
+
+      .button i {
+        font-size: 14px;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px var(--shadow-dark);
+      }
+
+      .button:active {
+        transform: translateY(0);
+      }
+
+      .button-primary {
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      .button-primary:hover {
+        background: var(--primary-dark);
+      }
+
+      .button-success {
+        background: var(--success);
+        color: var(--white);
+      }
+
+      .button-success:hover {
+        background: var(--success-light);
+      }
+
+      .button-warning {
+        background: var(--warning);
+        color: var(--white);
+      }
+
+      .button-warning:hover {
+        background: var(--warning-light);
+      }
+
+      .button-danger {
+        background: var(--danger);
+        color: var(--white);
+      }
+
+      .button-danger:hover {
+        background: var(--danger-light);
+      }
+
+      .button-outline {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--primary);
+      }
+
+      .button-outline:hover {
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      /* Search bar */
+      .search-bar {
+        display: flex;
+        margin-bottom: 20px;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .search-bar input {
+        flex: 1;
+        margin-right: 10px;
+        padding: 12px;
+        padding-left: 40px;
+        position: relative;
+        box-shadow: 0 2px 5px var(--shadow);
+        border: 1px solid var(--border);
+        border-radius: var(--border-radius-sm);
+        font-size: 14px;
+        transition: var(--transition);
+        color: var(--text);
+        background-color: var(--white);
+      }
+
+      .search-bar input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+      }
+
+      .search-wrapper {
+        position: relative;
+        flex: 1;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+      }
+
+      /* Notifications */
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: var(--border-radius-sm);
+        background: var(--white);
+        color: var(--primary);
+        box-shadow: 0 5px 15px var(--shadow-dark);
+        display: none;
+        z-index: 1000;
+        border-left: 4px solid var(--primary);
+        font-weight: 500;
+        min-width: 300px;
+        max-width: 450px;
+        animation: slideIn 0.3s forwards;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Modals */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .modal.open {
+        opacity: 1;
+      }
+
+      .modal-content {
+        background: var(--white);
+        padding: 30px;
+        border-radius: var(--border-radius);
+        width: 90%;
+        max-width: 650px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px var(--shadow-dark);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        position: relative;
+      }
+
+      .modal.open .modal-content {
+        transform: scale(1);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .modal-header h3 {
+        font-size: 20px;
+        color: var(--primary-dark);
+        font-weight: 600;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .close {
+        cursor: pointer;
+        font-size: 24px;
+        color: var(--text-light);
+        transition: var(--transition);
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+
+      .close:hover {
+        color: var(--danger);
+        background: rgba(217, 4, 41, 0.1);
+      }
+
+      /* Forms */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--border-radius-sm);
+        font-size: 14px;
+        transition: var(--transition);
+        color: var(--text);
+        background-color: var(--white);
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      /* Tab Content */
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Tabs */
+      .tab-container {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .tab {
+        padding: 12px 20px;
+        cursor: pointer;
+        background: var(--background-alt);
+        border-radius: 10px 10px 0 0;
+        margin-right: 5px;
+        font-weight: 500;
+        transition: var(--transition);
+        white-space: nowrap;
+      }
+
+      .tab:hover {
+        background: var(--hover-background);
+        color: var(--primary);
+      }
+
+      .tab.active {
+        background: var(--primary);
+        color: var(--white);
+      }
+
+      /* Status badges */
+      .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+      }
+
+      .status-active {
+        background: #e6f7e6;
+        color: #277227;
+        border: 1px solid #99d699;
+      }
+
+      .status-inactive {
+        background: #fde6e9;
+        color: #8b0017;
+        border: 1px solid #f28b9c;
+      }
+
+      /* Stats cards */
+      .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        box-shadow: 0 3px 10px var(--shadow);
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px var(--shadow-dark);
+      }
+
+      .stat-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 48px;
+        opacity: 0.1;
+        color: var(--primary);
+      }
+
+      .stat-value {
+        font-size: 30px;
+        font-weight: 700;
+        margin: 10px 0;
+        color: var(--primary-dark);
+      }
+
+      .stat-label {
+        color: var(--text-light);
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* Chart container */
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin-top: 20px;
+      }
+
+      .chart-legend {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+        justify-content: center;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+      }
+
+      /* Filter options */
+      .filter-options {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      /* Action buttons container */
+      .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      /* Role badges */
+      .role-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+      }
+
+      .role-admin {
+        background: #e7f5ff;
+        color: #1864ab;
+        border: 1px solid #74c0fc;
+      }
+
+      .role-doctor {
+        background: #f3f0ff;
+        color: #5f3dc4;
+        border: 1px solid #b197fc;
+      }
+
+      .role-patient {
+        background: #fff9db;
+        color: #e67700;
+        border: 1px solid #ffe066;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="logo">
+        <img
+          width="200"
+          height="50"
+          src="Screenshot 2025-03-06 235118.png"
+          class="header_logo header-logo"
+          alt="Valeo"
+        />
+      </div>
+
+      <div class="menu-item" data-tab="dashboard">
+        <i class="fas fa-tachometer-alt"></i>
+        Tổng quan
+      </div>
+      <div class="menu-item" data-tab="patients">
+        <i class="fas fa-users"></i>
+        Bệnh nhân
+      </div>
+      <div class="menu-item" data-tab="doctors">
+        <i class="fas fa-user-md"></i>
+        Bác sĩ
+      </div>
+      <div class="menu-item" data-tab="users">
+        <i class="fas fa-user-cog"></i>
+        Quản lý tài khoản
+      </div>
+      <div class="menu-item" data-tab="reports">
+        <i class="fas fa-chart-bar"></i>
+        Báo cáo thống kê
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          Đăng xuất
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="header">
+        <h2 id="pageTitle">Tổng quan hệ thống</h2>
+        <div class="user-info"><i class="fas fa-user-shield"></i> Admin</div>
+      </div>
+
+      <!-- Tổng quan -->
+      <div id="dashboard" class="tab-content active">
+        <div class="stats-container">
+          <div class="stat-card">
+            <i class="fas fa-users stat-icon"></i>
+            <div class="stat-label">Tổng số bệnh nhân</div>
+            <div class="stat-value">1,245</div>
+            <div>Tăng 12% so với tháng trước</div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-user-md stat-icon"></i>
+            <div class="stat-label">Tổng số bác sĩ</div>
+            <div class="stat-value">48</div>
+            <div>Tăng 5% so với tháng trước</div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-calendar-check stat-icon"></i>
+            <div class="stat-label">Lịch hẹn tháng này</div>
+            <div class="stat-value">856</div>
+            <div>Tăng 8% so với tháng trước</div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-check-circle stat-icon"></i>
+            <div class="stat-label">Tỉ lệ xác nhận</div>
+            <div class="stat-value">85.7%</div>
+            <div>Tăng 3% so với tháng trước</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Hoạt động gần đây</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Người dùng</th>
+                <th>Hoạt động</th>
+                <th>Thời gian</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hoàng ngân (Bác sĩ)</td>
+                <td>Xác nhận lịch hẹn với bệnh nhân Trần Văn Hiếu</td>
+                <td>5 phút trước</td>
+              </tr>
+              <tr>
+                <td>Lê Thị Cúc (Bệnh nhân)</td>
+                <td>Đặt lịch hẹn mới</td>
+                <td>10 phút trước</td>
+              </tr>
+              <tr>
+                <td>Admin</td>
+                <td>Cập nhật thông tin bác sĩ Phạm Văn Dũng</td>
+                <td>25 phút trước</td>
+              </tr>
+              <tr>
+                <td>Nguyễn Thị ý (Bệnh nhân)</td>
+                <td>Hủy lịch hẹn</td>
+                <td>45 phút trước</td>
+              </tr>
+              <tr>
+                <td>Admin</td>
+                <td>Thêm bác sĩ mới</td>
+                <td>1 giờ trước</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bệnh nhân -->
+      <div id="patients" class="tab-content">
+        <div class="card">
+          <div class="action-buttons">
+            <div class="search-wrapper">
+              <i class="fas fa-search search-icon"></i>
+              <input
+                type="text"
+                id="patientSearch"
+                placeholder="Tìm kiếm bệnh nhân..."
+                onkeyup="searchPatients()"
+              />
+            </div>
+            <button
+              class="button button-primary"
+              onclick="openAddPatientModal()"
+            >
+              <i class="fas fa-plus"></i> Thêm bệnh nhân mới
+            </button>
+          </div>
+
+          <h3>Danh sách bệnh nhân</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Tên bệnh nhân</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Lịch hẹn gần nhất</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="patientList"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bác sĩ -->
+      <div id="doctors" class="tab-content">
+        <div class="card">
+          <div class="action-buttons">
+            <div class="search-wrapper">
+              <i class="fas fa-search search-icon"></i>
+              <input
+                type="text"
+                id="doctorSearch"
+                placeholder="Tìm kiếm bác sĩ..."
+                onkeyup="searchDoctors()"
+              />
+            </div>
+            <button
+              class="button button-primary"
+              onclick="openAddDoctorModal()"
+            >
+              <i class="fas fa-plus"></i> Thêm bác sĩ mới
+            </button>
+          </div>
+
+          <h3>Danh sách bác sĩ</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Tên bác sĩ</th>
+                <th>Chuyên khoa</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Số lịch hẹn</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="doctorList"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quản lý tài khoản -->
+      <div id="users" class="tab-content">
+        <div class="card">
+          <div class="action-buttons">
+            <div class="search-wrapper">
+              <i class="fas fa-search search-icon"></i>
+              <input
+                type="text"
+                id="userSearch"
+                placeholder="Tìm kiếm tài khoản..."
+                onkeyup="searchUsers()"
+              />
+            </div>
+            <button class="button button-primary" onclick="openAddUserModal()">
+              <i class="fas fa-plus"></i> Thêm tài khoản mới
+            </button>
+          </div>
+
+          <h3>Danh sách tài khoản</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Tên đăng nhập</th>
+                <th>Tên người dùng</th>
+                <th>Email</th>
+                <th>Quyền hạn</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="userList"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Báo cáo thống kê -->
+      <div id="reports" class="tab-content">
+        <div class="card">
+          <h3>Báo cáo thống kê</h3>
+          <div class="filter-options">
+            <button
+              class="button button-outline"
+              onclick="filterReports('day')"
+              id="filterDay"
+            >
+              Ngày
+            </button>
+            <button
+              class="button button-outline"
+              onclick="filterReports('week')"
+              id="filterWeek"
+            >
+              Tuần
+            </button>
+            <button
+              class="button button-primary"
+              onclick="filterReports('month')"
+              id="filterMonth"
+            >
+              Tháng
+            </button>
+            <button
+              class="button button-outline"
+              onclick="filterReports('year')"
+              id="filterYear"
+            >
+              Năm
+            </button>
+          </div>
+
+          <div class="stats-container">
+            <div class="stat-card">
+              <i class="fas fa-calendar-alt stat-icon"></i>
+              <div class="stat-label">Tổng lịch hẹn</div>
+              <div class="stat-value" id="totalAppointments">856</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-check-circle stat-icon"></i>
+              <div class="stat-label">Tỉ lệ xác nhận</div>
+              <div class="stat-value" id="confirmRate">85.7%</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-times-circle stat-icon"></i>
+              <div class="stat-label">Tỉ lệ hủy</div>
+              <div class="stat-value" id="cancelRate">8.3%</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-user-md stat-icon"></i>
+              <div class="stat-label">Bác sĩ được đặt nhiều nhất</div>
+              <div class="stat-value" id="topDoctor">Hoangvutru</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Biểu đồ lịch hẹn theo thời gian</h3>
+            <div class="chart-container" id="appointmentsChart">
+              <!-- Chart sẽ được render bằng JavaScript -->
+              <canvas id="appointmentsTrendChart"></canvas>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div
+                  class="legend-color"
+                  style="background-color: #4361ee"
+                ></div>
+                <div>Tổng lịch hẹn</div>
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-color"
+                  style="background-color: #38b000"
+                ></div>
+                <div>Lịch hẹn đã xác nhận</div>
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-color"
+                  style="background-color: #d90429"
+                ></div>
+                <div>Lịch hẹn đã hủy</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Top 5 bác sĩ được đặt lịch nhiều nhất</h3>
+            <div class="chart-container" id="topDoctorsChart">
+              <!-- Chart sẽ được render bằng JavaScript -->
+              <canvas id="topDoctorsBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thông báo -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Modal thêm/sửa bệnh nhân -->
+    <div id="patientModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="patientModalTitle">Thêm bệnh nhân mới</h3>
+          <span class="close" onclick="closeModal('patientModal')"
+            >&times;</span
+          >
+        </div>
+        <form id="patientForm">
+          <input type="hidden" id="patientId" />
+          <div class="form-group">
+            <label for="patientName">Họ và tên</label>
+            <input type="text" id="patientName" required />
+          </div>
+          <div class="form-group">
+            <label for="patientEmail">Email</label>
+            <input type="email" id="patientEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="patientPhone">Số điện thoại</label>
+            <input type="text" id="patientPhone" required />
+          </div>
+          <div class="form-group">
+            <label for="patientDob">Ngày sinh</label>
+            <input type="date" id="patientDob" />
+          </div>
+          <div class="form-group">
+            <label for="patientAddress">Địa chỉ</label>
+            <textarea id="patientAddress"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="patientStatus">Trạng thái</label>
+            <select id="patientStatus">
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            class="button button-primary"
+            id="savePatientBtn"
+            onclick="savePatient()"
+          >
+            Lưu thông tin
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal thêm/sửa bác sĩ -->
+    <div id="doctorModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="doctorModalTitle">Thêm bác sĩ mới</h3>
+          <span class="close" onclick="closeModal('doctorModal')">&times;</span>
+        </div>
+        <form id="doctorForm">
+          <input type="hidden" id="doctorId" />
+          <div class="form-group">
+            <label for="doctorName">Họ và tên</label>
+            <input type="text" id="doctorName" required />
+          </div>
+          <div class="form-group">
+            <label for="doctorSpecialty">Chuyên khoa</label>
+            <input type="text" id="doctorSpecialty" required />
+          </div>
+          <div class="form-group">
+            <label for="doctorEmail">Email</label>
+            <input type="email" id="doctorEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="doctorPhone">Số điện thoại</label>
+            <input type="text" id="doctorPhone" required />
+          </div>
+          <div class="form-group">
+            <label for="doctorExperience">Kinh nghiệm (năm)</label>
+            <input type="number" id="doctorExperience" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="doctorBio">Giới thiệu</label>
+            <textarea id="doctorBio"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="doctorStatus">Trạng thái</label>
+            <select id="doctorStatus">
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            class="button button-primary"
+            id="saveDoctorBtn"
+            onclick="saveDoctor()"
+          >
+            Lưu thông tin
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal thêm/sửa tài khoản -->
+    <div id="userModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="userModalTitle">Thêm tài khoản mới</h3>
+          <span class="close" onclick="closeModal('userModal')">&times;</span>
+        </div>
+        <form id="userForm">
+          <input type="hidden" id="userId" />
+          <div class="form-group">
+            <label for="username">Tên đăng nhập</label>
+            <input type="text" id="username" required />
+          </div>
+          <div class="form-group">
+            <label for="fullName">Họ và tên</label>
+            <input type="text" id="fullName" required />
+          </div>
+          <div class="form-group">
+            <label for="userEmail">Email</label>
+            <input type="email" id="userEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="userPassword">Mật khẩu</label>
+            <input type="password" id="userPassword" />
+            <small>Để trống nếu không thay đổi mật khẩu</small>
+          </div>
+          <div class="form-group">
+            <label for="userRole">Quyền hạn</label>
+            <select id="userRole" required>
+              <option value="admin">Admin</option>
+              <option value="doctor">Bác sĩ</option>
+              <option value="patient">Bệnh nhân</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="userStatus">Trạng thái</label>
+            <select id="userStatus">
+              <option value="active">Đang hoạt động</option>
+              <option value="inactive">Không hoạt động</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            class="button button-primary"
+            id="saveUserBtn"
+            onclick="saveUser()"
+          >
+            Lưu thông tin
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal xem lịch sử khám bệnh -->
+    <div id="historyModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Lịch sử khám bệnh</h3>
+          <span class="close" onclick="closeModal('historyModal')"
+            >&times;</span
+          >
+        </div>
+        <div id="patientHistoryContent">
+          <!-- Nội dung lịch sử khám bệnh sẽ được thêm vào đây -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Load Chart.js từ CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+
+    <script>
+      // Dữ liệu mẫu cho bệnh nhân
+      var patients = [
+        {
+          id: 1,
+          name: "Nguyễn Văn Anh",
+          email: "nguyenvana@example.com",
+          phone: "0901234567",
+          dob: "1985-05-15",
+          address: "123 Đường ABC, Quận 1, TP HCM",
+          lastAppointment: "2023-09-28",
+          status: "active",
+        },
+        {
+          id: 2,
+          name: "Trần Thị Hương",
+          email: "tranthib@example.com",
+          phone: "0912345678",
+          dob: "1990-10-20",
+          address: "456 Đường XYZ, Quận 2, TP HCM",
+          lastAppointment: "2023-09-25",
+          status: "active",
+        },
+        {
+          id: 3,
+          name: "Lê Văn Công",
+          email: "levanc@example.com",
+          phone: "0923456789",
+          dob: "1978-03-10",
+          address: "789 Đường DEF, Quận 3, TP HCM",
+          lastAppointment: "2023-09-15",
+          status: "inactive",
+        },
+        {
+          id: 4,
+          name: "Phạm Thị Nhàn",
+          email: "phamthid@example.com",
+          phone: "0934567890",
+          dob: "1995-12-05",
+          address: "101 Đường GHI, Quận Tân Bình, TP HCM",
+          lastAppointment: "2023-09-20",
+          status: "active",
+        },
+        {
+          id: 5,
+          name: "Hoàng Văn Hùng",
+          email: "hoangvane@example.com",
+          phone: "0945678901",
+          dob: "1982-07-25",
+          address: "202 Đường JKL, Quận Bình Thạnh, TP HCM",
+          lastAppointment: "2023-09-18",
+          status: "active",
+        },
+      ];
+
+      // Dữ liệu mẫu cho bác sĩ
+      var doctors = [
+        {
+          id: 1,
+          name: "Du Thiên",
+          specialty: "Nội tổng quát",
+          email: "tranvanf@example.com",
+          phone: "0956789012",
+          experience: 10,
+          bio: "Bác sĩ Du Thiên có hơn 10 năm kinh nghiệm trong lĩnh vực Nội tổng quát...",
+          appointmentCount: 145,
+          status: "active",
+        },
+        {
+          id: 2,
+          name: "Nguyễn Thị G",
+          specialty: "Nhi khoa",
+          email: "nguyenthig@example.com",
+          phone: "0967890123",
+          experience: 8,
+          bio: "Bác sĩ Nguyễn Thị G chuyên về Nhi khoa với 8 năm kinh nghiệm...",
+          appointmentCount: 120,
+          status: "active",
+        },
+        {
+          id: 3,
+          name: "Lê Văn H",
+          specialty: "Tim mạch",
+          email: "levanh@example.com",
+          phone: "0978901234",
+          experience: 15,
+          bio: "Bác sĩ Lê Văn H là chuyên gia tim mạch với 15 năm kinh nghiệm...",
+          appointmentCount: 165,
+          status: "active",
+        },
+        {
+          id: 4,
+          name: "Phạm Văn I",
+          specialty: "Da liễu",
+          email: "phamvani@example.com",
+          phone: "0989012345",
+          experience: 7,
+          bio: "Bác sĩ Phạm Văn I chuyên điều trị các bệnh về da liễu...",
+          appointmentCount: 98,
+          status: "inactive",
+        },
+        {
+          id: 5,
+          name: "Hoàng Thị K",
+          specialty: "Sản phụ khoa",
+          email: "hoangthik@example.com",
+          phone: "0990123456",
+          experience: 12,
+          bio: "Bác sĩ Hoàng Thị K có 12 năm kinh nghiệm trong lĩnh vực Sản phụ khoa...",
+          appointmentCount: 185,
+          status: "active",
+        },
+      ];
+
+      // Dữ liệu mẫu cho tài khoản
+      var users = [
+        {
+          id: 1,
+          username: "admin",
+          fullName: "Admin System",
+          email: "admin@example.com",
+          role: "admin",
+          status: "active",
+        },
+        {
+          id: 2,
+          username: "tranvanf",
+          fullName: "Trần Văn F",
+          email: "tranvanf@example.com",
+          role: "doctor",
+          status: "active",
+        },
+        {
+          id: 3,
+          username: "nguyenthig",
+          fullName: "Nguyễn Thị G",
+          email: "nguyenthig@example.com",
+          role: "doctor",
+          status: "active",
+        },
+        {
+          id: 4,
+          username: "nguyenvana",
+          fullName: "Nguyễn Văn A",
+          email: "nguyenvana@example.com",
+          role: "patient",
+          status: "active",
+        },
+        {
+          id: 5,
+          username: "tranthib",
+          fullName: "Trần Thị B",
+          email: "tranthib@example.com",
+          role: "patient",
+          status: "active",
+        },
+      ];
+
+      // Dữ liệu mẫu cho lịch sử khám bệnh
+      var medicalHistories = {
+        1: [
+          {
+            date: "2023-09-28",
+            doctor: "Nguyễn Văn Anh",
+            symptoms: "Đau đầu, sốt nhẹ",
+            diagnosis: "Cảm cúm",
+            treatment: "Uống nhiều nước, nghỉ ngơi, uống thuốc theo đơn",
+            prescription: "Paracetamol 500mg",
+          },
+          {
+            date: "2023-08-15",
+            doctor: "Lê Văn H",
+            symptoms: "Khó thở, đau ngực",
+            diagnosis: "Viêm phổi nhẹ",
+            treatment: "Điều trị bằng kháng sinh",
+            prescription: "Amoxicillin 500mg",
+          },
+        ],
+        2: [
+          {
+            date: "2023-09-25",
+            doctor: "Nguyễn Thị G",
+            symptoms: "Ho, sốt cao",
+            diagnosis: "Viêm họng cấp",
+            treatment: "Nghỉ ngơi, uống thuốc theo đơn",
+            prescription: "Amoxicillin 500mg, Paracetamol 500mg",
+          },
+        ],
+      };
+
+      // Dữ liệu mẫu cho báo cáo thống kê
+      var reportData = {
+        day: {
+          totalAppointments: 42,
+          confirmRate: "83.5%",
+          cancelRate: "9.2%",
+          topDoctor: "Dr. Hoàng Thị K",
+        },
+        week: {
+          totalAppointments: 245,
+          confirmRate: "84.2%",
+          cancelRate: "8.7%",
+          topDoctor: "Dr. Lê Văn H",
+        },
+        month: {
+          totalAppointments: 856,
+          confirmRate: "85.7%",
+          cancelRate: "8.3%",
+          topDoctor: "Dr. Hoàng Thị K",
+        },
+        year: {
+          totalAppointments: 9875,
+          confirmRate: "87.1%",
+          cancelRate: "7.6%",
+          topDoctor: "Dr. Lê Văn H",
+        },
+      };
+
+      // Hàm chuyển đổi tab - đã sửa để sử dụng cú pháp ES5
+      function handleTabClick(tabId) {
+        console.log("Tab clicked: " + tabId);
+
+        // Ẩn tất cả các tab
+        var allTabs = document.getElementsByClassName("tab-content");
+        for (var i = 0; i < allTabs.length; i++) {
+          allTabs[i].classList.remove("active");
+        }
+
+        // Hiển thị tab được chọn
+        var selectedTab = document.getElementById(tabId);
+        if (selectedTab) {
+          selectedTab.classList.add("active");
+        }
+
+        // Cập nhật trạng thái active của menu
+        var menuItems = document.getElementsByClassName("menu-item");
+        for (var i = 0; i < menuItems.length; i++) {
+          menuItems[i].classList.remove("active");
+        }
+
+        // Tìm menu item được click và thêm class active
+        var clickedItem = event.currentTarget;
+        if (clickedItem) {
+          clickedItem.classList.add("active");
+        }
+
+        // Cập nhật tiêu đề trang
+        var pageTitle = document.getElementById("pageTitle");
+        if (pageTitle) {
+          if (tabId === "dashboard") {
+            pageTitle.textContent = "Tổng quan hệ thống";
+          } else if (tabId === "patients") {
+            pageTitle.textContent = "Quản lý bệnh nhân";
+          } else if (tabId === "doctors") {
+            pageTitle.textContent = "Quản lý bác sĩ";
+          } else if (tabId === "users") {
+            pageTitle.textContent = "Quản lý tài khoản";
+          } else if (tabId === "reports") {
+            pageTitle.textContent = "Báo cáo thống kê";
+          }
+        }
+      }
+
+      // Hàm khởi tạo khi tải trang
+      window.onload = function () {
+        console.log("Trang đã tải xong");
+
+        // Tải dữ liệu
+        loadPatients();
+        loadDoctors();
+        loadUsers();
+
+        // Khởi tạo biểu đồ
+        initializeCharts();
+
+        // Thêm sự kiện click cho tất cả menu items
+        var menuItems = document.getElementsByClassName("menu-item");
+        for (var i = 0; i < menuItems.length; i++) {
+          menuItems[i].addEventListener("click", function () {
+            var tabId = this.getAttribute("data-tab");
+            if (tabId) {
+              handleTabClick(tabId);
+            }
+          });
+        }
+      };
+
+      // Format date
+      function formatDate(dateString) {
+        var date = new Date(dateString);
+        return (
+          date.getDate() +
+          "/" +
+          (date.getMonth() + 1) +
+          "/" +
+          date.getFullYear()
+        );
+      }
+
+      // Hiển thị thông báo
+      function showNotification(message) {
+        var notification = document.getElementById("notification");
+        notification.textContent = message;
+        notification.style.display = "block";
+        setTimeout(function () {
+          notification.style.display = "none";
+        }, 3000);
+      }
+
+      // Mở modal
+      function openModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = "flex";
+
+        // Thêm class open để kích hoạt animation
+        setTimeout(function () {
+          modal.classList.add("open");
+        }, 10);
+      }
+
+      // Đóng modal
+      function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.classList.remove("open");
+
+        // Chờ animation hoàn tất trước khi ẩn modal
+        setTimeout(function () {
+          modal.style.display = "none";
+        }, 300);
+      }
+
+      // QUẢN LÝ BỆNH NHÂN
+      function loadPatients() {
+        var patientList = document.getElementById("patientList");
+        if (!patientList) return;
+
+        patientList.innerHTML = ""; // Xóa dữ liệu cũ
+
+        var searchTerm = document.getElementById("patientSearch")
+          ? document.getElementById("patientSearch").value.toLowerCase()
+          : "";
+
+        for (var i = 0; i < patients.length; i++) {
+          var patient = patients[i];
+          if (
+            searchTerm === "" ||
+            patient.name.toLowerCase().includes(searchTerm) ||
+            patient.email.toLowerCase().includes(searchTerm)
+          ) {
+            patientList.innerHTML += `
+              <tr>
+                <td>${patient.name}</td>
+                <td>${patient.email}</td>
+                <td>${patient.phone}</td>
+                <td>${
+                  patient.lastAppointment
+                    ? formatDate(patient.lastAppointment)
+                    : "Chưa có"
+                }</td>
+                <td><span class="status-badge ${
+                  patient.status === "active"
+                    ? "status-active"
+                    : "status-inactive"
+                }">${
+              patient.status === "active" ? "Đang hoạt động" : "Không hoạt động"
+            }</span></td>
+                <td>
+                  <button class="button button-primary" onclick="editPatient(${
+                    patient.id
+                  })">
+                    <i class="fas fa-edit"></i> Sửa
+                  </button>
+                  <button class="button button-danger" onclick="deletePatient(${
+                    patient.id
+                  })">
+                    <i class="fas fa-trash"></i> Xóa
+                  </button>
+                  <button class="button button-warning" onclick="viewPatientHistory(${
+                    patient.id
+                  })">
+                    <i class="fas fa-history"></i> Lịch sử
+                  </button>
+                </td>
+              </tr>
+            `;
+          }
+        }
+      }
+
+      // QUẢN LÝ BÁC SĨ
+      function loadDoctors() {
+        var doctorList = document.getElementById("doctorList");
+        if (!doctorList) return;
+
+        doctorList.innerHTML = ""; // Xóa dữ liệu cũ
+
+        var searchTerm = document.getElementById("doctorSearch")
+          ? document.getElementById("doctorSearch").value.toLowerCase()
+          : "";
+
+        for (var i = 0; i < doctors.length; i++) {
+          var doctor = doctors[i];
+          if (
+            searchTerm === "" ||
+            doctor.name.toLowerCase().includes(searchTerm) ||
+            doctor.specialty.toLowerCase().includes(searchTerm) ||
+            doctor.email.toLowerCase().includes(searchTerm)
+          ) {
+            doctorList.innerHTML += `
+              <tr>
+                <td>${doctor.name}</td>
+                <td>${doctor.specialty}</td>
+                <td>${doctor.email}</td>
+                <td>${doctor.phone}</td>
+                <td>${doctor.appointmentCount}</td>
+                <td><span class="status-badge ${
+                  doctor.status === "active"
+                    ? "status-active"
+                    : "status-inactive"
+                }">${
+              doctor.status === "active" ? "Đang hoạt động" : "Không hoạt động"
+            }</span></td>
+                <td>
+                  <button class="button button-primary" onclick="editDoctor(${
+                    doctor.id
+                  })">
+                    <i class="fas fa-edit"></i> Sửa
+                  </button>
+                  <button class="button button-danger" onclick="deleteDoctor(${
+                    doctor.id
+                  })">
+                    <i class="fas fa-trash"></i> Xóa
+                  </button>
+                </td>
+              </tr>
+            `;
+          }
+        }
+      }
+
+      // QUẢN LÝ TÀI KHOẢN
+      function loadUsers() {
+        var userList = document.getElementById("userList");
+        if (!userList) return;
+
+        userList.innerHTML = ""; // Xóa dữ liệu cũ
+
+        var searchTerm = document.getElementById("userSearch")
+          ? document.getElementById("userSearch").value.toLowerCase()
+          : "";
+
+        for (var i = 0; i < users.length; i++) {
+          var user = users[i];
+          if (
+            searchTerm === "" ||
+            user.username.toLowerCase().includes(searchTerm) ||
+            user.fullName.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm)
+          ) {
+            var roleClass = "";
+            var roleText = "";
+
+            switch (user.role) {
+              case "admin":
+                roleClass = "role-admin";
+                roleText = "Admin";
+                break;
+              case "doctor":
+                roleClass = "role-doctor";
+                roleText = "Bác sĩ";
+                break;
+              case "patient":
+                roleClass = "role-patient";
+                roleText = "Bệnh nhân";
+                break;
+            }
+
+            userList.innerHTML += `
+              <tr>
+                <td>${user.username}</td>
+                <td>${user.fullName}</td>
+                <td>${user.email}</td>
+                <td><span class="role-badge ${roleClass}">${roleText}</span></td>
+                <td><span class="status-badge ${
+                  user.status === "active" ? "status-active" : "status-inactive"
+                }">${
+              user.status === "active" ? "Đang hoạt động" : "Không hoạt động"
+            }</span></td>
+                <td>
+                  <button class="button button-primary" onclick="editUser(${
+                    user.id
+                  })">
+                    <i class="fas fa-edit"></i> Sửa
+                  </button>
+                  <button class="button button-danger" onclick="deleteUser(${
+                    user.id
+                  })">
+                    <i class="fas fa-trash"></i> Xóa
+                  </button>
+                </td>
+              </tr>
+            `;
+          }
+        }
+      }
+
+      // Khởi tạo biểu đồ
+      function initializeCharts() {
+        if (typeof Chart === "undefined") {
+          console.log("Chart.js không được tải");
+          return;
+        }
+
+        // Biểu đồ lịch hẹn theo thời gian
+        var trendCtx = document.getElementById("appointmentsTrendChart");
+        if (trendCtx) {
+          window.appointmentsTrendChart = new Chart(trendCtx, {
+            type: "line",
+            data: {
+              labels: [
+                "T1",
+                "T2",
+                "T3",
+                "T4",
+                "T5",
+                "T6",
+                "T7",
+                "T8",
+                "T9",
+                "T10",
+                "T11",
+                "T12",
+              ],
+              datasets: [
+                {
+                  label: "Tổng lịch hẹn",
+                  data: [720, 750, 780, 800, 820, 840, 856, 0, 0, 0, 0, 0],
+                  borderColor: "#4361ee",
+                  backgroundColor: "rgba(67, 97, 238, 0.1)",
+                  tension: 0.3,
+                  fill: true,
+                },
+                {
+                  label: "Đã xác nhận",
+                  data: [600, 630, 650, 680, 700, 720, 733, 0, 0, 0, 0, 0],
+                  borderColor: "#38b000",
+                  backgroundColor: "rgba(56, 176, 0, 0.1)",
+                  tension: 0.3,
+                  fill: true,
+                },
+                {
+                  label: "Đã hủy",
+                  data: [50, 60, 70, 65, 70, 71, 71, 0, 0, 0, 0, 0],
+                  borderColor: "#d90429",
+                  backgroundColor: "rgba(217, 4, 41, 0.1)",
+                  tension: 0.3,
+                  fill: true,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+                tooltip: {
+                  mode: "index",
+                  intersect: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    precision: 0,
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        // Biểu đồ top bác sĩ
+        var topDoctorsCtx = document.getElementById("topDoctorsBarChart");
+        if (topDoctorsCtx) {
+          window.topDoctorsChart = new Chart(topDoctorsCtx, {
+            type: "bar",
+            data: {
+              labels: [
+                "Dr. Hoàng Thị K",
+                "Dr. Lê Văn H",
+                "Dr. Trần Văn F",
+                "Dr. Nguyễn Thị G",
+                "Dr. Phạm Văn I",
+              ],
+              datasets: [
+                {
+                  label: "Lịch hẹn",
+                  data: [185, 165, 145, 120, 98],
+                  backgroundColor: [
+                    "rgba(67, 97, 238, 0.8)",
+                    "rgba(67, 97, 238, 0.7)",
+                    "rgba(67, 97, 238, 0.6)",
+                    "rgba(67, 97, 238, 0.5)",
+                    "rgba(67, 97, 238, 0.4)",
+                  ],
+                  borderColor: [
+                    "rgba(67, 97, 238, 1)",
+                    "rgba(67, 97, 238, 1)",
+                    "rgba(67, 97, 238, 1)",
+                    "rgba(67, 97, 238, 1)",
+                    "rgba(67, 97, 238, 1)",
+                  ],
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    precision: 0,
+                  },
+                },
+              },
+            },
+          });
+        }
+      }
+
+      // Lọc báo cáo theo thời gian
+      function filterReports(period) {
+        // Cập nhật UI
+        var buttons = document.querySelectorAll(".filter-options button");
+        for (var i = 0; i < buttons.length; i++) {
+          buttons[i].classList.remove("button-primary");
+          buttons[i].classList.add("button-outline");
+        }
+
+        var activeButton = document.getElementById(
+          "filter" + period.charAt(0).toUpperCase() + period.slice(1)
+        );
+        if (activeButton) {
+          activeButton.classList.remove("button-outline");
+          activeButton.classList.add("button-primary");
+        }
+
+        // Cập nhật dữ liệu
+        if (reportData[period]) {
+          document.getElementById("totalAppointments").textContent =
+            reportData[period].totalAppointments;
+          document.getElementById("confirmRate").textContent =
+            reportData[period].confirmRate;
+          document.getElementById("cancelRate").textContent =
+            reportData[period].cancelRate;
+          document.getElementById("topDoctor").textContent =
+            reportData[period].topDoctor;
+        }
+
+        // Cập nhật biểu đồ
+        updateCharts(period);
+      }
+
+      function updateCharts(period) {
+        if (!window.appointmentsTrendChart) return;
+
+        // Cập nhật dữ liệu cho biểu đồ theo thời gian
+        var timeLabels = [];
+        var totalData = [];
+        var confirmedData = [];
+        var cancelledData = [];
+
+        switch (period) {
+          case "day":
+            timeLabels = ["8-10", "10-12", "12-14", "14-16", "16-18", "18-20"];
+            totalData = [8, 12, 5, 7, 6, 4];
+            confirmedData = [7, 10, 4, 6, 5, 3];
+            cancelledData = [1, 1, 0, 1, 1, 0];
+            break;
+          case "week":
+            timeLabels = [
+              "Thứ 2",
+              "Thứ 3",
+              "Thứ 4",
+              "Thứ 5",
+              "Thứ 6",
+              "Thứ 7",
+              "CN",
+            ];
+            totalData = [45, 52, 48, 35, 30, 25, 10];
+            confirmedData = [38, 44, 40, 30, 26, 21, 8];
+            cancelledData = [4, 5, 4, 3, 2, 2, 1];
+            break;
+          case "month":
+            timeLabels = ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4"];
+            totalData = [210, 220, 215, 211];
+            confirmedData = [180, 188, 183, 182];
+            cancelledData = [17, 18, 18, 18];
+            break;
+          case "year":
+            timeLabels = [
+              "T1",
+              "T2",
+              "T3",
+              "T4",
+              "T5",
+              "T6",
+              "T7",
+              "T8",
+              "T9",
+              "T10",
+              "T11",
+              "T12",
+            ];
+            totalData = [
+              720, 750, 780, 800, 820, 840, 856, 880, 900, 920, 950, 980,
+            ];
+            confirmedData = [
+              600, 630, 650, 680, 700, 720, 733, 750, 770, 790, 820, 850,
+            ];
+            cancelledData = [50, 60, 70, 65, 70, 71, 71, 73, 75, 76, 80, 82];
+            break;
+        }
+
+        window.appointmentsTrendChart.data.labels = timeLabels;
+        window.appointmentsTrendChart.data.datasets[0].data = totalData;
+        window.appointmentsTrendChart.data.datasets[1].data = confirmedData;
+        window.appointmentsTrendChart.data.datasets[2].data = cancelledData;
+        window.appointmentsTrendChart.update();
+      }
+
+      // Các chức năng thêm/sửa/xóa bệnh nhân
+      function openAddPatientModal() {
+        document.getElementById("patientModalTitle").textContent =
+          "Thêm bệnh nhân mới";
+        document.getElementById("patientForm").reset();
+        document.getElementById("patientId").value = "";
+        document.getElementById("savePatientBtn").textContent =
+          "Thêm bệnh nhân";
+
+        openModal("patientModal");
+      }
+
+      function editPatient(patientId) {
+        var patient = null;
+        for (var i = 0; i < patients.length; i++) {
+          if (patients[i].id === patientId) {
+            patient = patients[i];
+            break;
+          }
+        }
+
+        if (patient) {
+          document.getElementById("patientModalTitle").textContent =
+            "Cập nhật thông tin bệnh nhân";
+          document.getElementById("patientId").value = patient.id;
+          document.getElementById("patientName").value = patient.name;
+          document.getElementById("patientEmail").value = patient.email;
+          document.getElementById("patientPhone").value = patient.phone;
+          document.getElementById("patientDob").value = patient.dob || "";
+          document.getElementById("patientAddress").value =
+            patient.address || "";
+          document.getElementById("patientStatus").value = patient.status;
+          document.getElementById("savePatientBtn").textContent = "Cập nhật";
+
+          openModal("patientModal");
+        }
+      }
+
+      function savePatient() {
+        var patientId = document.getElementById("patientId").value;
+        var name = document.getElementById("patientName").value;
+        var email = document.getElementById("patientEmail").value;
+        var phone = document.getElementById("patientPhone").value;
+        var dob = document.getElementById("patientDob").value;
+        var address = document.getElementById("patientAddress").value;
+        var status = document.getElementById("patientStatus").value;
+
+        if (patientId) {
+          // Cập nhật bệnh nhân hiện có
+          for (var i = 0; i < patients.length; i++) {
+            if (patients[i].id == patientId) {
+              patients[i].name = name;
+              patients[i].email = email;
+              patients[i].phone = phone;
+              patients[i].dob = dob;
+              patients[i].address = address;
+              patients[i].status = status;
+
+              showNotification("Đã cập nhật thông tin bệnh nhân " + name);
+              break;
+            }
+          }
+        } else {
+          // Thêm bệnh nhân mới
+          var newId = 1;
+          for (var i = 0; i < patients.length; i++) {
+            if (patients[i].id >= newId) {
+              newId = patients[i].id + 1;
+            }
+          }
+
+          patients.push({
+            id: newId,
+            name: name,
+            email: email,
+            phone: phone,
+            dob: dob,
+            address: address,
+            lastAppointment: null,
+            status: status,
+          });
+
+          showNotification("Đã thêm bệnh nhân " + name);
+        }
+
+        closeModal("patientModal");
+        loadPatients();
+      }
+
+      function deletePatient(patientId) {
+        var patientName = "";
+        for (var i = 0; i < patients.length; i++) {
+          if (patients[i].id === patientId) {
+            patientName = patients[i].name;
+            break;
+          }
+        }
+
+        if (
+          patientName &&
+          confirm("Bạn có chắc muốn xóa bệnh nhân " + patientName + "?")
+        ) {
+          patients = patients.filter(function (p) {
+            return p.id !== patientId;
+          });
+          showNotification("Đã xóa bệnh nhân " + patientName);
+          loadPatients();
+        }
+      }
+
+      function viewPatientHistory(patientId) {
+        var patient = null;
+        for (var i = 0; i < patients.length; i++) {
+          if (patients[i].id === patientId) {
+            patient = patients[i];
+            break;
+          }
+        }
+
+        if (patient) {
+          var historyContainer = document.getElementById(
+            "patientHistoryContent"
+          );
+          var history = medicalHistories[patientId] || [];
+
+          var historyHTML =
+            "<h4>Lịch sử khám bệnh của " + patient.name + "</h4>";
+
+          if (history.length > 0) {
+            for (var i = 0; i < history.length; i++) {
+              var record = history[i];
+              historyHTML += `
+                <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <strong>Ngày khám: ${formatDate(record.date)}</strong>
+                    <div>Bác sĩ: ${record.doctor}</div>
+                  </div>
+                  <div style="margin-bottom: 8px;"><strong>Triệu chứng:</strong> ${
+                    record.symptoms
+                  }</div>
+                  <div style="margin-bottom: 8px;"><strong>Chẩn đoán:</strong> ${
+                    record.diagnosis
+                  }</div>
+                  <div style="margin-bottom: 8px;"><strong>Điều trị:</strong> ${
+                    record.treatment
+                  }</div>
+                  <div><strong>Đơn thuốc:</strong> ${record.prescription}</div>
+                </div>
+              `;
+            }
+          } else {
+            historyHTML +=
+              '<p style="margin-top: 20px;">Bệnh nhân chưa có lịch sử khám bệnh.</p>';
+          }
+
+          historyContainer.innerHTML = historyHTML;
+          openModal("historyModal");
+        }
+      }
+
+      // Các chức năng thêm/sửa/xóa bác sĩ
+      function openAddDoctorModal() {
+        document.getElementById("doctorModalTitle").textContent =
+          "Thêm bác sĩ mới";
+        document.getElementById("doctorForm").reset();
+        document.getElementById("doctorId").value = "";
+        document.getElementById("saveDoctorBtn").textContent = "Thêm bác sĩ";
+
+        openModal("doctorModal");
+      }
+
+      function editDoctor(doctorId) {
+        var doctor = null;
+        for (var i = 0; i < doctors.length; i++) {
+          if (doctors[i].id === doctorId) {
+            doctor = doctors[i];
+            break;
+          }
+        }
+
+        if (doctor) {
+          document.getElementById("doctorModalTitle").textContent =
+            "Cập nhật thông tin bác sĩ";
+          document.getElementById("doctorId").value = doctor.id;
+          document.getElementById("doctorName").value = doctor.name;
+          document.getElementById("doctorSpecialty").value = doctor.specialty;
+          document.getElementById("doctorEmail").value = doctor.email;
+          document.getElementById("doctorPhone").value = doctor.phone;
+          document.getElementById("doctorExperience").value = doctor.experience;
+          document.getElementById("doctorBio").value = doctor.bio;
+          document.getElementById("doctorStatus").value = doctor.status;
+          document.getElementById("saveDoctorBtn").textContent = "Cập nhật";
+
+          openModal("doctorModal");
+        }
+      }
+
+      function saveDoctor() {
+        var doctorId = document.getElementById("doctorId").value;
+        var name = document.getElementById("doctorName").value;
+        var specialty = document.getElementById("doctorSpecialty").value;
+        var email = document.getElementById("doctorEmail").value;
+        var phone = document.getElementById("doctorPhone").value;
+        var experience = document.getElementById("doctorExperience").value;
+        var bio = document.getElementById("doctorBio").value;
+        var status = document.getElementById("doctorStatus").value;
+
+        if (doctorId) {
+          // Cập nhật bác sĩ hiện có
+          for (var i = 0; i < doctors.length; i++) {
+            if (doctors[i].id == doctorId) {
+              doctors[i].name = name;
+              doctors[i].specialty = specialty;
+              doctors[i].email = email;
+              doctors[i].phone = phone;
+              doctors[i].experience = experience;
+              doctors[i].bio = bio;
+              doctors[i].status = status;
+
+              showNotification("Đã cập nhật thông tin bác sĩ " + name);
+              break;
+            }
+          }
+        } else {
+          // Thêm bác sĩ mới
+          var newId = 1;
+          for (var i = 0; i < doctors.length; i++) {
+            if (doctors[i].id >= newId) {
+              newId = doctors[i].id + 1;
+            }
+          }
+
+          doctors.push({
+            id: newId,
+            name: name,
+            specialty: specialty,
+            email: email,
+            phone: phone,
+            experience: experience,
+            bio: bio,
+            appointmentCount: 0,
+            status: status,
+          });
+
+          showNotification("Đã thêm bác sĩ " + name);
+        }
+
+        closeModal("doctorModal");
+        loadDoctors();
+      }
+
+      function deleteDoctor(doctorId) {
+        var doctorName = "";
+        for (var i = 0; i < doctors.length; i++) {
+          if (doctors[i].id === doctorId) {
+            doctorName = doctors[i].name;
+            break;
+          }
+        }
+
+        if (
+          doctorName &&
+          confirm("Bạn có chắc muốn xóa bác sĩ " + doctorName + "?")
+        ) {
+          doctors = doctors.filter(function (d) {
+            return d.id !== doctorId;
+          });
+          showNotification("Đã xóa bác sĩ " + doctorName);
+          loadDoctors();
+        }
+      }
+
+      // Các chức năng thêm/sửa/xóa tài khoản
+      function openAddUserModal() {
+        document.getElementById("userModalTitle").textContent =
+          "Thêm tài khoản mới";
+        document.getElementById("userForm").reset();
+        document.getElementById("userId").value = "";
+        document.getElementById("userPassword").required = true;
+        document.getElementById("saveUserBtn").textContent = "Thêm tài khoản";
+
+        openModal("userModal");
+      }
+
+      function editUser(userId) {
+        var user = null;
+        for (var i = 0; i < users.length; i++) {
+          if (users[i].id === userId) {
+            user = users[i];
+            break;
+          }
+        }
+
+        if (user) {
+          document.getElementById("userModalTitle").textContent =
+            "Cập nhật tài khoản";
+          document.getElementById("userId").value = user.id;
+          document.getElementById("username").value = user.username;
+          document.getElementById("fullName").value = user.fullName;
+          document.getElementById("userEmail").value = user.email;
+          document.getElementById("userPassword").required = false;
+          document.getElementById("userPassword").value = "";
+          document.getElementById("userRole").value = user.role;
+          document.getElementById("userStatus").value = user.status;
+          document.getElementById("saveUserBtn").textContent = "Cập nhật";
+
+          openModal("userModal");
+        }
+      }
+
+      function saveUser() {
+        var userId = document.getElementById("userId").value;
+        var username = document.getElementById("username").value;
+        var fullName = document.getElementById("fullName").value;
+        var email = document.getElementById("userEmail").value;
+        var password = document.getElementById("userPassword").value;
+        var role = document.getElementById("userRole").value;
+        var status = document.getElementById("userStatus").value;
+
+        if (userId) {
+          // Cập nhật tài khoản hiện có
+          for (var i = 0; i < users.length; i++) {
+            if (users[i].id == userId) {
+              users[i].username = username;
+              users[i].fullName = fullName;
+              users[i].email = email;
+              users[i].role = role;
+              users[i].status = status;
+
+              showNotification("Đã cập nhật tài khoản " + username);
+              break;
+            }
+          }
+        } else {
+          // Thêm tài khoản mới
+          var newId = 1;
+          for (var i = 0; i < users.length; i++) {
+            if (users[i].id >= newId) {
+              newId = users[i].id + 1;
+            }
+          }
+
+          users.push({
+            id: newId,
+            username: username,
+            fullName: fullName,
+            email: email,
+            role: role,
+            status: status,
+          });
+
+          showNotification("Đã thêm tài khoản " + username);
+        }
+
+        closeModal("userModal");
+        loadUsers();
+      }
+
+      function deleteUser(userId) {
+        var userName = "";
+        for (var i = 0; i < users.length; i++) {
+          if (users[i].id === userId) {
+            userName = users[i].username;
+            break;
+          }
+        }
+
+        if (
+          userName &&
+          confirm("Bạn có chắc muốn xóa tài khoản " + userName + "?")
+        ) {
+          users = users.filter(function (u) {
+            return u.id !== userId;
+          });
+          showNotification("Đã xóa tài khoản " + userName);
+          loadUsers();
+        }
+      }
+
+      function logout() {
+        if (confirm("Bạn có chắc muốn đăng xuất?")) {
+          window.location.href = "Dangnhap.html";
+        }
+      }
+    </script>
+  </body>
+</html>
